@@ -4,7 +4,7 @@ Do qualitative A-B image comparison surveys.
 
 ### Requirements
 
-* python 3.6 or newer
+* python 3.7 or newer
 * sqlite 3.24.0 or newer
 
 ### Installation & Running

@@ -27,7 +27,7 @@ function Home() {
                 <h1 className={classes.title}>Image Survey</h1>
                 <p>
                     This survey will ask you to compare images.
-                    It will only take around 15 minutes of your time.
+                    It will take around 15 minutes to complete.
                     We collect no private information.
                 </p>
                 <p>

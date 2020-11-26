@@ -1,8 +1,9 @@
-from uuid import uuid4
+import asyncio
 import os
 import aiosqlite
 from hashlib import scrypt
 from sanic.log import logger
+from image_survey.imagesets import VoteSet
 
 
 class DB:
@@ -21,19 +22,23 @@ class DB:
             'CREATE TABLE IF NOT EXISTS admins('
             '  username TEXT PRIMARY KEY,'
             '  salt TEXT,'
-            '  password TEXT,'
+            '  password TEXT'
             ');'
         )
         await self.__conn.execute(
            'CREATE TABLE IF NOT EXISTS votes('
            '  token_id TEXT,'
            '  date_cast TEXT,'
+           '  original TEXT,'
            '  option_A TEXT,'
            '  option_B TEXT,'
            '  voted_for TEXT,'
-           '  PRIMARY KEY (id, option_A, option_B)'
+           '  PRIMARY KEY (token_id, option_A, option_B)'
            '  FOREIGN KEY (token_id) REFERENCES tokens(id)'
            ');'
+        )
+        await self.__conn.execute(
+            'CREATE INDEX IF NOT EXISTS token_votes ON votes(token_id);'
         )
 
     async def save_token(self, token):
@@ -54,21 +59,35 @@ class DB:
         salt, password_real = await salt_cursor.fetchone()
         return scrypt(password_claim, salt=salt) == password_real
 
-    async def save_update_vote(self, token, option_A, option_B, voted_for):
+    async def save_update_vote(self, token, original, option_A, option_B, voted_for):
         await self.__conn.execute('INSERT INTO votes(*)'
-                                  '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?)'
-                                  '  ON CONFLICT(token_id, option_A, option_B)'
+                                  '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?, ?)'
+                                  '  ON CONFLICT(token_id, original, option_A, option_B)'
                                   '    DO UPDATE SET voted_for = ?;',
-                                  [token, option_A, option_B, voted_for, voted_for])
+                                  [token, original, option_A, option_B, voted_for, voted_for])
 
     async def connect(self, *args, **kwargs):
         logger.info("Connecting to the database...")
         self.__conn = await aiosqlite.connect(*args, **kwargs)
         logger.info("Done!")
 
-    async def __aenter__(self):
+    async def get_uncast_votes(self, vote_sets, token):
+        vs = set(vote_sets)
+        async with self.__conn.execute(
+                'SELECT original, option_A, option_B FROM votes WHERE token_id = ?;',
+                [token]) as votes_cursor:
+            async for original, option_A, option_B in votes_cursor:
+                cast = VoteSet(original, option_A, option_B)
+                try:
+                    vs.remove(cast)
+                except KeyError:
+                    logger.warning(f"Token {token} previously cast vote {cast},"
+                                   f" but we currently don't have this image set")
+        return vs
+
+    def __enter__(self):
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         logger.info("Closing database connection!")
-        await self.__conn.close()
+        asyncio.run(self.__conn.close())

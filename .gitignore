@@ -1,3 +1,4 @@
 *.egg-info
 venv/
 image-survey.yaml
+*.sqlite
