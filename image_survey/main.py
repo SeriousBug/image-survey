@@ -5,12 +5,13 @@ from pathlib import Path
 from sanic import Sanic
 from sanic.log import logger
 from sanic.request import Request
-from sanic.response import json, html
+from sanic import exceptions, response
 import sanic_jwt
 from sanic_limiter import Limiter, get_remote_address
 import yaml
 from image_survey import db, auth
-from image_survey.imagesets import ImageSetCollector
+from image_survey.imagesets import ImageSetCollector, VoteSet
+from sanic_cors import CORS
 
 # Potential locations of the config file.
 # We'll try them in order, falling back to latter ones if earlier ones do not exist.
@@ -45,21 +46,33 @@ database = db.DB()
 app = Sanic("image survey", load_env="IMG_SURVEY_", strict_slashes=False)
 jwt = sanic_jwt.Initialize(app, authenticate=auth.authenticate(database))
 limiter = Limiter(app, global_limits=['120/minute'], key_func=get_remote_address)
+# TODO: Make this optionally enabled
+CORS(app)
 
 
-@app.route("/api/rate/<image>", methods=["POST"])
+@app.route("/api/rate", methods=["POST"])
 @jwt.protected()
-async def rate(request, image):
-    logger.info(f"[{request.ip}] Image {image} rated {request}")
+async def rate(request):
+    # Handle missing parameters with exception
+    voted = VoteSet(request.json.original, request.json.option_A, request.json.option_B)
+    voted_for = request.json.voted_for
+
+    if voted not in image_collector.vote_sets:
+        raise exceptions.InvalidUsage(f"{voted} is not a known image set")
+    if voted_for not in [voted.variant_A, voted.variant_B]:
+        raise exceptions.InvalidUsage(f"{voted_for} is not a correct option, must be {voted.variant_A} or {voted.variant_B}")
+
+    logger.info(f"{request.token} rated {voted} with {voted_for}")
+    await database.save_update_vote(request.token, voted, voted_for)
+    return response.empty()
 
 
 @app.route("/api/vote_sets")
 @jwt.protected()
 async def vote_sets(request: Request):
-    # TODO: Shuffle list
     vs = list(await database.get_uncast_votes(image_collector.vote_sets, request.token))
     shuffle(vs)
-    return json(vs)
+    return response.json(vs)
 
 
 @app.route("/api/stats")
@@ -67,7 +80,7 @@ async def vote_sets(request: Request):
 @jwt.scoped([auth.ADMIN])
 async def stats(request):
     # TODO
-    return json({})
+    raise NotImplementedError()
 
 
 @app.route("/api/download_data")
@@ -75,7 +88,7 @@ async def stats(request):
 @jwt.scoped([auth.ADMIN])
 async def download_data(request):
     # TODO
-    return json({})
+    raise NotImplementedError()
 
 
 def find_config():
@@ -89,7 +102,7 @@ def find_config():
 
 
 if __name__ == "__main__":
-    logger.info("--[ image-survey ]--")
+    logger.info("-------[ image-survey ]-------")
     config = {**DEFAULT_CONFIG, **app.config}
     config_file = find_config()
     if config_file is None:

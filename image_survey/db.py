@@ -59,12 +59,14 @@ class DB:
         salt, password_real = await salt_cursor.fetchone()
         return scrypt(password_claim, salt=salt) == password_real
 
-    async def save_update_vote(self, token, original, option_A, option_B, voted_for):
-        await self.__conn.execute('INSERT INTO votes(*)'
-                                  '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?, ?)'
-                                  '  ON CONFLICT(token_id, original, option_A, option_B)'
-                                  '    DO UPDATE SET voted_for = ?;',
-                                  [token, original, option_A, option_B, voted_for, voted_for])
+    async def save_update_vote(self, token, vote_set: VoteSet, voted_for):
+        await self.__conn.execute(
+            'INSERT INTO votes(*)'
+            '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?, ?)'
+            '  ON CONFLICT(token_id, original, option_A, option_B)'
+            '    DO UPDATE SET voted_for = ?;',
+            [token, vote_set.original, vote_set.option_A, vote_set.option_B, voted_for, voted_for]
+        )
 
     async def connect(self, *args, **kwargs):
         logger.info("Connecting to the database...")

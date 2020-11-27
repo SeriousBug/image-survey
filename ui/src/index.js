@@ -1,47 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
-import Home from './Home';
-import Comparison from "./Comparison";
 import reportWebVitals from './reportWebVitals';
-
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-} from "react-router-dom";
-import Paper from "@material-ui/core/Paper";
-import {Container} from "@material-ui/core";
-import BackButton from "./BackButton";
+import App from './App';
 
 ReactDOM.render(
     <React.StrictMode>
-        <Router>
-            <Switch>
-                <Route exact path="/">
-                    <Home/>
-                </Route>
-                <Route path="/survey/:number">
-                    <Comparison/>
-                </Route>
-                <Route path="/complete/">
-                    <Container>
-                        <BackButton/>
-                        <Paper>
-                            <p>Thanks for completing our survey!</p>
-                        </Paper>
-                    </Container>
-                </Route>
-                <Route path="*">
-                    <Container>
-                        <BackButton/>
-                        <Paper>
-                            <p>Uh-oh, something went wrong! Try refreshing the page.</p>
-                        </Paper>
-                    </Container>
-                </Route>
-            </Switch>
-        </Router>
+        <App/>
     </React.StrictMode>,
     document.getElementById('root')
 );

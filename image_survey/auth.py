@@ -6,7 +6,7 @@ ADMIN = 'admin'
 
 
 def authenticate(database):
-    async def authenticate(request, *args, **kwargs):
+    async def _authenticate(request, *args, **kwargs):
         if request.json:
             username = request.json.get("username", None)
             password = request.json.get("password", None)
@@ -26,4 +26,4 @@ def authenticate(database):
         if await database.verify_user(username, password):
             return {'user_id': username, 'scopes': [ADMIN]}
         raise jwt_exceptions.AuthenticationFailed('Incorrect username or password.')
-    return authenticate
+    return _authenticate
