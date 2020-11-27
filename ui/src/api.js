@@ -1,6 +1,7 @@
 import axios from "axios";
 import cookie from "js-cookie";
 import showError from "./ErrorMsg";
+import ErrorMsg from "./ErrorMsg";
 
 
 const COOKIE_NAME = 'image-survey'
@@ -16,12 +17,12 @@ async function init_token() {
     if (token === undefined) {
         try {
             const response = await axios.post('/auth', {});
-            console.log(response);
             const token = response.data['access_token'];
             cookie.set(COOKIE_NAME, token);
             __set_auth_token(token);
         } catch (err) {
-            showError(err.toJSON());
+            console.log('Got error!' + err.toString());
+            ErrorMsg.showError(err.toJSON());
         }
     }
     __set_auth_token(token);
@@ -36,9 +37,10 @@ async function init() {
 
 async function get_images() {
     try {
-        const response = await axios.get('/')
+        const response = await axios.get('/api/vote_sets');
+        image_sets = response.data;
     } catch (err) {
-
+        ErrorMsg.showError(err.toJSON());
     }
 }
 

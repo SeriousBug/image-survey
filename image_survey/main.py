@@ -70,6 +70,7 @@ async def rate(request):
 @app.route("/api/vote_sets")
 @jwt.protected()
 async def vote_sets(request: Request):
+    # TODO: Don't eliminate uncast votes, put them in a different list so we can show them before this set
     vs = list(await database.get_uncast_votes(image_collector.vote_sets, request.token))
     shuffle(vs)
     return response.json(vs)

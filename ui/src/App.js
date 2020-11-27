@@ -15,45 +15,39 @@ import init from "./api";
 
 
 class App extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     async componentDidMount() {
         await init();
     }
 
     render() {
         return (
-//            <>
-//                <ErrorMsg/>
-                <Router>
-                    <Switch>
-                        <Route exact path="/">
-                            <Home/>
-                        </Route>
-                        <Route path="/survey/:number">
-                            <Comparison/>
-                        </Route>
-                        <Route path="/complete/">
-                            <Container>
-                                <BackButton/>
-                                <Paper>
-                                    <p>Thanks for completing our survey!</p>
-                                </Paper>
-                            </Container>
-                        </Route>
-                        <Route path="*">
-                            <Container>
-                                <BackButton/>
-                                <Paper>
-                                    <p>Uh-oh, something went wrong! Try refreshing the page.</p>
-                                </Paper>
-                            </Container>
-                        </Route>
-                    </Switch>
-                </Router>
-//            </>
+            <Router>
+                <ErrorMsg/>
+                <Switch>
+                    <Route exact path="/">
+                        <Home/>
+                    </Route>
+                    <Route path="/survey/:number">
+                        <Comparison/>
+                    </Route>
+                    <Route path="/complete/">
+                        <Container>
+                            <BackButton/>
+                            <Paper>
+                                <p>Thanks for completing our survey!</p>
+                            </Paper>
+                        </Container>
+                    </Route>
+                    <Route path="*">
+                        <Container>
+                            <BackButton/>
+                            <Paper>
+                                <p>Uh-oh, something went wrong! Try refreshing the page.</p>
+                            </Paper>
+                        </Container>
+                    </Route>
+                </Switch>
+            </Router>
         );
     }
 }
