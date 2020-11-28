@@ -1,5 +1,6 @@
 import asyncio
 import os
+import itertools
 from random import shuffle
 from pathlib import Path
 from sanic import Sanic
@@ -50,6 +51,8 @@ limiter = Limiter(app, global_limits=['120/minute'], key_func=get_remote_address
 CORS(app)
 
 
+app.static('/image-files/', str(Path.cwd() / 'image-files'))
+
 @app.route("/api/rate", methods=["POST"])
 @jwt.protected()
 async def rate(request):
@@ -70,10 +73,14 @@ async def rate(request):
 @app.route("/api/vote_sets")
 @jwt.protected()
 async def vote_sets(request: Request):
-    # TODO: Don't eliminate uncast votes, put them in a different list so we can show them before this set
-    vs = list(await database.get_uncast_votes(image_collector.vote_sets, request.token))
-    shuffle(vs)
-    return response.json(vs)
+    cast_votes = await database.get_cast_votes(request.token)
+    uncast_votes = list(image_collector.vote_sets.difference(cast_votes))
+    shuffle(uncast_votes)
+    votes = [v._asdict() for v in itertools.chain(cast_votes, uncast_votes)]
+    return response.json({
+        'votesets': votes,
+        'current': len(cast_votes),
+    })
 
 
 @app.route("/api/stats")

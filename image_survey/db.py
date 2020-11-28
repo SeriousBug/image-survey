@@ -73,19 +73,15 @@ class DB:
         self.__conn = await aiosqlite.connect(*args, **kwargs)
         logger.info("Done!")
 
-    async def get_uncast_votes(self, vote_sets, token):
-        vs = set(vote_sets)
+    async def get_cast_votes(self, token):
+        cast_votes = []
         async with self.__conn.execute(
-                'SELECT original, option_A, option_B FROM votes WHERE token_id = ?;',
-                [token]) as votes_cursor:
+            'SELECT original, option_A, option_B FROM votes WHERE token_id = ? ORDER BY date_cast ASC;',
+            [token]
+        ) as votes_cursor:
             async for original, option_A, option_B in votes_cursor:
-                cast = VoteSet(original, option_A, option_B)
-                try:
-                    vs.remove(cast)
-                except KeyError:
-                    logger.warning(f"Token {token} previously cast vote {cast},"
-                                   f" but we currently don't have this image set")
-        return vs
+                cast_votes.append(VoteSet(original, option_A, option_B))
+        return cast_votes
 
     def __enter__(self):
         return self

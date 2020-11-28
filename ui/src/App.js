@@ -10,7 +10,7 @@ import Home from './Home';
 import Comparison from "./Comparison";
 import BackButton from "./BackButton";
 import ErrorMsg from "./ErrorMsg";
-import init from "./api";
+import {init, get_images} from "./api";
 
 
 

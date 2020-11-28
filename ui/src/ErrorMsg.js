@@ -29,7 +29,7 @@ export default class ErrorMsg extends Component {
 
     render() {
         return (
-            <Dialog open={this.state.message} onClose={this.close}>
+            <Dialog open={this.state.message != null} onClose={this.close}>
                 <DialogTitle>Error</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
