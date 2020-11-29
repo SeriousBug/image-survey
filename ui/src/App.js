@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, useEffect} from 'react';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,46 +10,77 @@ import Home from './Home';
 import Comparison from "./Comparison";
 import BackButton from "./BackButton";
 import ErrorMsg from "./ErrorMsg";
-import {init, get_images} from "./api";
+import {get_images, init} from "./api";
+import Typography from "@material-ui/core/Typography";
+import makeStyles from "@material-ui/core/styles";
+import {useHistory} from "react-router-dom";
 
 
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        padding: theme.spacing(1),
+        textAlign: 'left',
+        color: theme.palette.text.primary,
+    },
+}));
 
-class App extends Component {
-    async componentDidMount() {
-        await init();
-    }
 
-    render() {
+function App() {
+    useEffect(() => {
+        init();
+    })
+
+    const classes = useStyles();
+    const hist = useHistory();
+
+    const StartSurvey = () => {
+        useEffect(() => {
+            (async function () {
+                await get_images();
+                if ()
+            })();
+        });
+
         return (
-            <Router>
-                <ErrorMsg/>
-                <Switch>
-                    <Route exact path="/">
-                        <Home/>
-                    </Route>
-                    <Route path="/survey/:number">
-                        <Comparison/>
-                    </Route>
-                    <Route path="/complete/">
-                        <Container>
-                            <BackButton/>
-                            <Paper>
-                                <p>Thanks for completing our survey!</p>
-                            </Paper>
-                        </Container>
-                    </Route>
-                    <Route path="*">
-                        <Container>
-                            <BackButton/>
-                            <Paper>
-                                <p>Uh-oh, something went wrong! Try refreshing the page.</p>
-                            </Paper>
-                        </Container>
-                    </Route>
-                </Switch>
-            </Router>
+            <Container>
+                <Paper>
+                    <Typography>Loading...</Typography>
+                </Paper>
+            </Container>
         );
-    }
-}
+    };
 
-export default App;
+    return (
+        <Router>
+            <ErrorMsg/>
+            <Switch>
+                <Route exact path="/">
+                    <Home/>
+                </Route>
+                <Route path="/survey/:number">
+                    <Comparison/>
+                </Route>
+                <Route path="/complete/">
+                    <Container>
+                        <BackButton/>
+                        <Paper>
+                            <Typography>Thanks for completing our survey!</Typography>
+                        </Paper>
+                    </Container>
+                </Route>
+                <Route path="/start-survey/">
+
+                </Route>
+                <Route path="*">
+                    <Container>
+                        <BackButton/>
+                        <Paper>
+                            <Typography>Uh-oh, something went wrong! Try refreshing the page.</Typography>
+                        </Paper>
+                    </Container>
+                </Route>
+            </Switch>
+        </Router>
+    );
+}
+}

@@ -42,7 +42,7 @@ function Home() {
                     CSE 5522 class. The results will be reported as aggregated statistics.
                     No personally identifiable information is collected, stored, or reported.
                 </p>
-                <Link to="/survey/0">
+                <Link to="/start-survey/">
                     <Button className={classes.action} variant="contained" color="primary">
                         Start Survey
                     </Button>
