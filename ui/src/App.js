@@ -1,4 +1,4 @@
-import React, {Component, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,9 +10,9 @@ import Home from './Home';
 import Comparison from "./Comparison";
 import BackButton from "./BackButton";
 import ErrorMsg from "./ErrorMsg";
-import {get_images, init} from "./api";
+import {get_images, images, init, last_current} from "./api";
 import Typography from "@material-ui/core/Typography";
-import makeStyles from "@material-ui/core/styles";
+import {makeStyles} from "@material-ui/core/styles";
 import {useHistory} from "react-router-dom";
 
 
@@ -25,30 +25,34 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function App() {
-    useEffect(() => {
-        init();
-    })
-
-    const classes = useStyles();
+function StartSurvey(setImages, classes) {
     const hist = useHistory();
 
-    const StartSurvey = () => {
-        useEffect(() => {
-            (async function () {
-                await get_images();
-                if ()
-            })();
-        });
+    useEffect(() => {
+        (async function () {
+            await init();
+            await get_images();
+            console.log('image_sets ' + JSON.stringify(images));
+            console.log('current ' + last_current);
+            for (let i = 0; i <= last_current; i++) {
+                if (i === 0) hist.replace('/survey/' + i);
+                else hist.push('/survey/' + i);
+            }
+        })();
+    });
 
-        return (
-            <Container>
-                <Paper>
-                    <Typography>Loading...</Typography>
-                </Paper>
-            </Container>
-        );
-    };
+    return (
+        <Container>
+            <Paper className={classes.paper}>
+                <Typography>Loading...</Typography>
+            </Paper>
+        </Container>
+    );
+}
+
+
+export default function App() {
+    const classes = useStyles();
 
     return (
         <Router>
@@ -63,18 +67,18 @@ function App() {
                 <Route path="/complete/">
                     <Container>
                         <BackButton/>
-                        <Paper>
+                        <Paper className={classes.paper}>
                             <Typography>Thanks for completing our survey!</Typography>
                         </Paper>
                     </Container>
                 </Route>
                 <Route path="/start-survey/">
-
+                    <StartSurvey/>
                 </Route>
                 <Route path="*">
                     <Container>
                         <BackButton/>
-                        <Paper>
+                        <Paper className={classes.paper}>
                             <Typography>Uh-oh, something went wrong! Try refreshing the page.</Typography>
                         </Paper>
                     </Container>
@@ -82,5 +86,4 @@ function App() {
             </Switch>
         </Router>
     );
-}
 }

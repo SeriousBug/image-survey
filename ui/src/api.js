@@ -10,6 +10,11 @@ function __set_auth_token(token) {
     axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 }
 
+
+export let images = [];
+export let last_current = -1;
+
+
 // Reload a saved token, or acquire a new one if needed
 async function init_token() {
     const token = cookie.get(COOKIE_NAME);
@@ -21,8 +26,8 @@ async function init_token() {
             cookie.set(COOKIE_NAME, token);
             __set_auth_token(token);
         } catch (err) {
-            console.log('Got error!' + err.toString());
-            ErrorMsg.showError(err.toJSON());
+            console.log('Got error!' + JSON.stringify(err));
+            ErrorMsg.showError(JSON.stringify(err));
         }
     } else {
         __set_auth_token(token);
@@ -39,8 +44,10 @@ export async function init() {
 export async function get_images() {
     try {
         const response = await axios.get('/api/vote_sets');
-        return response.data;
+        console.log(JSON.stringify(response.data));
+        images = response.data['votesets'];
+        last_current = response.data['current'];
     } catch (err) {
-        ErrorMsg.showError(err.toJSON());
+        ErrorMsg.showError(JSON.stringify(err));
     }
 }

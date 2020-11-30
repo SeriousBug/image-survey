@@ -2,3 +2,4 @@
 venv/
 image-survey.yaml
 *.sqlite
+*.sqlite-journal

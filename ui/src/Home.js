@@ -1,3 +1,4 @@
+import React from 'react';
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
 import {makeStyles} from "@material-ui/core/styles";

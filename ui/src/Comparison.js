@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import Paper from "@material-ui/core/Paper";
 import {Container} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -8,9 +8,9 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import PropTypes from "prop-types";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import {useHistory, useParams} from "react-router-dom";
+import {useHistory, useLocation, useParams} from "react-router-dom";
 import BackButton from "./BackButton"
-import {get_images} from "./api";
+import {images} from "./api";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function LinearProgressWithLabel(props) {
-    const classes = useStyles();
     return (
         <Box margin="4em 10px" display="flex" alignItems="center">
             <Box width="100%" mr={1}>
@@ -73,11 +72,12 @@ export default function Comparison() {
     const classes = useStyles();
     const {number} = useParams();
     const hist = useHistory();
-    const [images, set_images] = useState();
+    const loc = useLocation();
 
     function choices(choice) {
         return () => {
             let current = parseInt(number);
+            // TODO: Tell server the response
             if (current + 1 >= images.length) {
                 hist.push('/complete/')
             } else {
@@ -87,24 +87,17 @@ export default function Comparison() {
     }
 
     useEffect(() => {
-        if (images === undefined) {
-            (async function () {
-                const {votesets, current} = await get_images();
-                console.log('image_sets ' + JSON.stringify(votesets));
-                console.log('current ' + current);
-                set_images(votesets);
-                if (current !== 0) {
-                    for (let i = 0; i <= current; i++) {
-                        //hist.push('/survey/' + i);
-                    }
-                }
-            })();
+        console.log(loc.pathname);
+        console.log(images);
+        if (loc.pathname.startsWith('/survey') && (images === undefined || images.length == 0)) {
+            console.log('Trying to redirect');
+            hist.push('/start-survey/');
         }
     });
 
-    if (images !== undefined) {
+    console.log('Rendering images ' + JSON.stringify(images));
+    if (images !== undefined && images.length > 0) {
         let current = parseInt(number);
-        console.log('Rendering images ' + JSON.stringify(images));
         console.log('Rendering number ' + current);
         console.log('Rendering images[0] ' + JSON.stringify(images[current]));
 
@@ -140,6 +133,6 @@ export default function Comparison() {
             </Container>
         );
     } else {
-        return (<Container><Paper>"Loading..."</Paper></Container>);
+        return (<Container><Paper className={classes.paper}>...</Paper></Container>);
     }
 }
