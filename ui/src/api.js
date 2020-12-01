@@ -21,12 +21,13 @@ async function init_token() {
     console.log('Current token ' + token);
     if (token === undefined) {
         try {
-            const response = await axios.post('/auth', {});
+            const response = await axios.post('/api/auth', {});
             const token = response.data['access_token'];
             cookie.set(COOKIE_NAME, token);
             __set_auth_token(token);
         } catch (err) {
-            console.log('Got error!' + JSON.stringify(err));
+            console.log('Network error!')
+            console.log(err);
             ErrorMsg.showError(JSON.stringify(err));
         }
     } else {
@@ -48,6 +49,19 @@ export async function get_images() {
         images = response.data['votesets'];
         last_current = response.data['current'];
     } catch (err) {
+        console.log('Network error!')
+        console.log(err);
+        ErrorMsg.showError(JSON.stringify(err));
+    }
+}
+
+
+export async function vote_image(data) {
+    try {
+        await axios.post('/api/rate', data);
+    } catch (err) {
+        console.log('Network error!')
+        console.log(err);
         ErrorMsg.showError(JSON.stringify(err));
     }
 }

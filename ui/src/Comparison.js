@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import {useHistory, useLocation, useParams} from "react-router-dom";
 import BackButton from "./BackButton"
-import {images} from "./api";
+import {images, vote_image} from "./api";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -74,18 +74,6 @@ export default function Comparison() {
     const hist = useHistory();
     const loc = useLocation();
 
-    function choices(choice) {
-        return () => {
-            let current = parseInt(number);
-            // TODO: Tell server the response
-            if (current + 1 >= images.length) {
-                hist.push('/complete/')
-            } else {
-                hist.push('/survey/' + (current + 1));
-            }
-        };
-    }
-
     useEffect(() => {
         console.log(loc.pathname);
         console.log(images);
@@ -97,9 +85,38 @@ export default function Comparison() {
 
     console.log('Rendering images ' + JSON.stringify(images));
     if (images !== undefined && images.length > 0) {
-        let current = parseInt(number);
+        const current = parseInt(number);
         console.log('Rendering number ' + current);
         console.log('Rendering images[0] ' + JSON.stringify(images[current]));
+
+        let left, right;
+        if (Math.round(Math.random()) === 1) {
+            left = 'variant_A';
+            right = 'variant_B';
+        } else {
+            left = 'variant_B';
+            right = 'variant_A';
+        }
+
+        const data = {
+            original: images[current]['original'],
+            variant_A: images[current]['variant_A'],
+            variant_B: images[current]['variant_B'],
+        }
+
+        function choices(choice) {
+            return () => {
+                let current = parseInt(number);
+                let vote = {...data};
+                vote['voted_for'] = vote[choice];
+                vote_image(vote);
+                if (current + 1 >= images.length) {
+                    hist.push('/complete/')
+                } else {
+                    hist.push('/survey/' + (current + 1));
+                }
+            };
+        }
 
         return (
             <Container>
@@ -107,9 +124,9 @@ export default function Comparison() {
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image} src={IMAGE_ROOT + images[current]['variant_A']}/>
+                            <img className={classes.image} src={IMAGE_ROOT + images[current][left]}/>
                         </Paper>
-                        <Button onClick={choices("left")} className={classes.leftButton}
+                        <Button onClick={choices(left)} className={classes.leftButton}
                                 variant="contained" color="primary">
                             Left is better
                         </Button>
@@ -118,14 +135,14 @@ export default function Comparison() {
                         <Paper className={classes.paper}>
                             <img className={classes.image} src={IMAGE_ROOT + images[current]['original']}/>
                         </Paper>
-                        <Button onClick={choices("center")} className={classes.centerButton}
+                        <Button onClick={choices('original')} className={classes.centerButton}
                                 variant="contained" color="primary">About same</Button>
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image} src={IMAGE_ROOT + images[current]['variant_B']}/>
+                            <img className={classes.image} src={IMAGE_ROOT + images[current][right]}/>
                         </Paper>
-                        <Button onClick={choices("right")} className={classes.rightButton}
+                        <Button onClick={choices(right)} className={classes.rightButton}
                                 variant="contained" color="primary">Right is better</Button>
                     </Grid>
                 </Grid>

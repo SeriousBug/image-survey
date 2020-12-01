@@ -35,17 +35,49 @@ DEFAULT_CONFIG = {
     'KEEP_ALIVE_TIMEOUT': 15,
     'ACCESS_LOGGING': True,
     'IMAGE_FILES_PATH': './image-files',
-    'SANIC_JWT_EXPIRATION_DELTA': 60 * 60 * 72,  # 72 hours
-    'SANIC_JWT_ACCESS_TOKEN_NAME': 'image-survey',
-    'SANIC_JWT_URL_PREFIX': '/api/auth',
-    'SANIC_JWT_SECRET': 'image-survey secret',
+    'AUTH_EXPIRATION_DELTA': 60 * 60 * 72,  # 72 hours
+    'AUTH_URL_PREFIX': '/api/auth',
+    'AUTH_SECRET': 'image-survey secret',
 }
 
 
 image_collector = ImageSetCollector()
 database = db.DB()
 app = Sanic("image survey", load_env="IMG_SURVEY_", strict_slashes=False)
-jwt = sanic_jwt.Initialize(app, authenticate=auth.authenticate(database))
+
+
+def find_config():
+    for location in CONFIG_LOCATIONS:
+        if location.is_file():
+            try:
+                return location
+            except IOError:
+                continue
+    return None
+
+
+logger.info("-------[ image-survey ]-------")
+config = {**DEFAULT_CONFIG, **app.config}
+config_file = find_config()
+if config_file is None:
+    logger.info("No configuration file found.")
+else:
+    logger.info(f"Loading config from {str(config_file)}")
+    loaded_text = config_file.read_text()
+    loaded = yaml.safe_load(loaded_text)
+    if loaded is None:
+        loaded = {}
+    # Replace default options with ones provided in the file
+    config = {**config, **loaded}
+app.update_config(config)
+logger.info("Config loaded.")
+
+jwt = sanic_jwt.Initialize(app,
+                           authenticate=auth.authenticate(database),
+                           secret=config['AUTH_SECRET'],
+                           url_prefix=config['AUTH_URL_PREFIX'],
+                           expiration_delta=config['AUTH_EXPIRATION_DELTA'],
+)
 limiter = Limiter(app, global_limits=['120/minute'], key_func=get_remote_address)
 # TODO: Make this optionally enabled
 CORS(app)
@@ -53,13 +85,15 @@ CORS(app)
 
 app.static('/image-files/', str(Path.cwd() / 'image-files'))
 
+
 @app.route("/api/rate", methods=["POST"])
 @jwt.protected()
 async def rate(request):
-    # Handle missing parameters with exception
-    voted = VoteSet(request.json.original, request.json.option_A, request.json.option_B)
-    voted_for = request.json.voted_for
-
+    try:
+        voted = VoteSet(request.json['original'], request.json['variant_A'], request.json['variant_B'])
+        voted_for = request.json['voted_for']
+    except AttributeError:
+        raise exceptions.InvalidUsage("Invalid request, missing some parameters")
     if voted not in image_collector.vote_sets:
         raise exceptions.InvalidUsage(f"{voted} is not a known image set")
     if voted_for not in [voted.variant_A, voted.variant_B]:
@@ -99,33 +133,7 @@ async def download_data(request):
     raise NotImplementedError()
 
 
-def find_config():
-    for location in CONFIG_LOCATIONS:
-        if location.is_file():
-            try:
-                return location
-            except IOError:
-                continue
-    return None
-
-
 if __name__ == "__main__":
-    logger.info("-------[ image-survey ]-------")
-    config = {**DEFAULT_CONFIG, **app.config}
-    config_file = find_config()
-    if config_file is None:
-        logger.info("No configuration file found.")
-    else:
-        logger.info(f"Loading config from {str(config_file)}")
-        loaded_text = config_file.read_text()
-        loaded = yaml.safe_load(loaded_text)
-        if loaded is None:
-            loaded = {}
-        # Replace default options with ones provided in the file
-        config = {**config, **loaded}
-    app.update_config(config)
-    logger.info("Config loaded.")
-
     if config['IMAGE_FILES_PATH']:
         image_collector.location = Path(config['IMAGE_FILES_PATH'])
     image_collector.find_image_sets()

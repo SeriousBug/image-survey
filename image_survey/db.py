@@ -33,7 +33,7 @@ class DB:
            '  option_A TEXT,'
            '  option_B TEXT,'
            '  voted_for TEXT,'
-           '  PRIMARY KEY (token_id, option_A, option_B)'
+           '  PRIMARY KEY (token_id, original, option_A, option_B)'
            '  FOREIGN KEY (token_id) REFERENCES tokens(id)'
            ');'
         )
@@ -61,16 +61,17 @@ class DB:
 
     async def save_update_vote(self, token, vote_set: VoteSet, voted_for):
         await self.__conn.execute(
-            'INSERT INTO votes(*)'
+            'INSERT INTO votes'
             '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?, ?)'
             '  ON CONFLICT(token_id, original, option_A, option_B)'
             '    DO UPDATE SET voted_for = ?;',
-            [token, vote_set.original, vote_set.option_A, vote_set.option_B, voted_for, voted_for]
+            [token, vote_set.original, vote_set.variant_A, vote_set.variant_B, voted_for, voted_for]
         )
+        await self.__conn.commit()
 
     async def connect(self, *args, **kwargs):
         logger.info("Connecting to the database...")
-        self.__conn = await aiosqlite.connect(*args, **kwargs)
+        self.__conn = await aiosqlite.connect(*args, isolation_level=None, **kwargs)
         logger.info("Done!")
 
     async def get_cast_votes(self, token):
