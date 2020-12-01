@@ -77,7 +77,7 @@ export default function Comparison() {
     useEffect(() => {
         console.log(loc.pathname);
         console.log(images);
-        if (loc.pathname.startsWith('/survey') && (images === undefined || images.length == 0)) {
+        if (loc.pathname.startsWith('/survey') && (images === undefined || images.length === 0)) {
             console.log('Trying to redirect');
             hist.push('/start-survey/');
         }

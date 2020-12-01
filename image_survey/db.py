@@ -64,7 +64,7 @@ class DB:
             'INSERT INTO votes'
             '  VALUES(?, CURRENT_TIMESTAMP, ?, ?, ?, ?)'
             '  ON CONFLICT(token_id, original, option_A, option_B)'
-            '    DO UPDATE SET voted_for = ?;',
+            '    DO UPDATE SET voted_for = ?, date_cast = CURRENT_TIMESTAMP;',
             [token, vote_set.original, vote_set.variant_A, vote_set.variant_B, voted_for, voted_for]
         )
         await self.__conn.commit()

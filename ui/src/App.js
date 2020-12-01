@@ -35,8 +35,14 @@ function StartSurvey(setImages, classes) {
             console.log('image_sets ' + JSON.stringify(images));
             console.log('current ' + last_current);
             for (let i = 0; i <= last_current; i++) {
-                if (i === 0) hist.replace('/survey/' + i);
-                else hist.push('/survey/' + i);
+                let target;
+                if (i >= images.length) {
+                    target = '/complete/';
+                } else {
+                    target = '/survey/' + i;
+                }
+                if (i === 0) hist.replace(target);
+                else hist.push(target);
             }
         })();
     });
