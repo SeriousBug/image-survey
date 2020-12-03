@@ -13,6 +13,7 @@ import BackButton from "./BackButton"
 import {images, vote_image} from "./api";
 import {ZoomIn, ZoomOut} from "@material-ui/icons";
 import {bool, MersenneTwister19937} from "random-js";
+import {useDrag} from "react-use-gesture";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -28,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     image: {
         maxWidth: '100%',
         imageRendering: 'pixelated',
+        touchAction: 'none',
     },
     leftButton: {
         width: '40%',
@@ -82,14 +84,18 @@ export default function Comparison() {
 
     const zoomTransform = {
         transform: 'scale(' + zoomLevel + ') translate(' + position[0] + 'px, ' + position[1] + 'px)'
-    }
+    };
 
     const zoomIn = () => {
         setZoomLevel((z) => {if (z < MAX_ZOOM) return z + 1; return z;});
-    }
+    };
     const zoomOut = () => {
         setZoomLevel((z) => {if (z > 1) return z - 1; return z;});
-    }
+    };
+    const bindDrag = useDrag(({ down, delta: [mx, my] }) => {
+        // TODO: Keep in bounds
+        setPosition([position[0] + mx / zoomLevel, position[1] + my / zoomLevel]);
+    });
 
     useEffect(() => {
         console.log(loc.pathname);
@@ -149,7 +155,9 @@ export default function Comparison() {
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image}
+                            <img {...bindDrag()}
+                                 draggable="false"
+                                 className={classes.image}
                                  src={IMAGE_ROOT + images[current][left]}
                                  style={zoomTransform}/>
                         </Paper>
@@ -160,7 +168,9 @@ export default function Comparison() {
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image}
+                            <img {...bindDrag()}
+                                 draggable="false"
+                                 className={classes.image}
                                  src={IMAGE_ROOT + images[current]['original']}
                                  style={zoomTransform}/>
                         </Paper>
@@ -169,7 +179,9 @@ export default function Comparison() {
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image}
+                            <img {...bindDrag()}
+                                 draggable="false"
+                                 className={classes.image}
                                  src={IMAGE_ROOT + images[current][right]}
                                  style={zoomTransform}/>
                         </Paper>
