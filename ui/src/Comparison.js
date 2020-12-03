@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Paper from "@material-ui/core/Paper";
 import {Container} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -13,7 +13,9 @@ import BackButton from "./BackButton"
 import {images, vote_image} from "./api";
 import {ZoomIn, ZoomOut} from "@material-ui/icons";
 import {bool, MersenneTwister19937} from "random-js";
-import {useDrag} from "react-use-gesture";
+import {useGesture} from "react-use-gesture";
+import {MobileView, BrowserView} from "react-device-detect";
+import cookie from "js-cookie";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,6 +48,13 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(2),
         marginLeft: theme.spacing(1),
     },
+    comparisonContainer: {
+        maxWidth: '100%',
+    },
+    hint: {
+        marginBottom: theme.spacing(1),
+        color: theme.palette.text.secondary,
+    }
 }));
 
 function LinearProgressWithLabel(props) {
@@ -73,6 +82,9 @@ LinearProgressWithLabel.propTypes = {
 
 const IMAGE_ROOT = 'http://localhost:8000/';
 const MAX_ZOOM = 8;
+/** negative numbers zoom in when the wheel is rolled forward, positive numbers are opposite */
+const ZOOM_SPEED = -0.1;
+const RND_SEED_COOKIE = 'rndseed';
 
 export default function Comparison() {
     const classes = useStyles();
@@ -86,15 +98,35 @@ export default function Comparison() {
         transform: 'scale(' + zoomLevel + ') translate(' + position[0] + 'px, ' + position[1] + 'px)'
     };
 
-    const zoomIn = () => {
-        setZoomLevel((z) => {if (z < MAX_ZOOM) return z + 1; return z;});
+    const firstImage = useRef(null);
+
+    const zoomFn = (dz) => {
+        let newZoomLevel = zoomLevel + dz * ZOOM_SPEED;
+        if (MAX_ZOOM <= newZoomLevel || newZoomLevel <= 1) newZoomLevel = zoomLevel;
+
+        setZoomLevel(newZoomLevel);
     };
-    const zoomOut = () => {
-        setZoomLevel((z) => {if (z > 1) return z - 1; return z;});
-    };
-    const bindDrag = useDrag(({ down, delta: [mx, my] }) => {
-        // TODO: Keep in bounds
-        setPosition([position[0] + mx / zoomLevel, position[1] + my / zoomLevel]);
+
+    const bindGesture = useGesture({
+        onDrag: ({delta: [dx, dy]}) => {
+            let newX = position[0] + dx / zoomLevel;
+            let newY = position[1] + dy / zoomLevel;
+
+            const imgHalfWidth = firstImage.current.width / 2;
+            const imgHalfHeight = firstImage.current.height / 2;
+            if ((dx < 0 && newX < -1 * imgHalfWidth)
+                || (dx > 0 && newX > imgHalfWidth)) newX = position[0];
+            if ((dy < 0 && newY < -1 * imgHalfHeight)
+                || (dy > 0 && newY > imgHalfHeight)) newY = position[1];
+
+            setPosition([newX, newY]);
+        },
+        onWheel: ({delta: [dx, dy]}) => {
+            zoomFn(dy);
+        },
+        onPinch: ({delta: [distance, angle]}) => {
+            zoomFn(distance);
+        },
     });
 
     useEffect(() => {
@@ -106,14 +138,19 @@ export default function Comparison() {
         }
     });
 
-    console.log('Rendering images ' + JSON.stringify(images));
     if (images !== undefined && images.length > 0) {
         const current = parseInt(number);
-        console.log('Rendering number ' + current);
-        console.log('Rendering images[0] ' + JSON.stringify(images[current]));
 
+        // Randomly decide which variant should be displayed on the left, and which one on the right.
+        // The outcome is consistent for the same user looking at the same image: it will be displayed
+        // in the same places when going forward and backward in history, or when the page is refreshed.
+        let rndSeed = cookie.get(RND_SEED_COOKIE);
+        if (rndSeed === undefined) {
+            rndSeed = Math.round(Math.random());
+            cookie.set(RND_SEED_COOKIE, rndSeed);
+        }
         let left, right;
-        if (bool()(MersenneTwister19937.seed(current))) {
+        if (bool()(MersenneTwister19937.seed(current + rndSeed))) {
             left = 'variant_A';
             right = 'variant_B';
         } else {
@@ -142,20 +179,31 @@ export default function Comparison() {
         }
 
         return (
-            <Container>
+            <Container className={classes.comparisonContainer}>
+                <Container>
+                    <Typography className={classes.hint}>
+                        <MobileView>
+                            Pinch to zoom, tap and drag to move.
+                        </MobileView>
+                        <BrowserView>
+                            Scroll wheel to zoom, click and drag to move.
+                        </BrowserView>
+                    </Typography>
+                </Container>
                 <Container>
                     <BackButton/>
-                    <Button onClick={zoomIn} className={classes.topButtons} variant="outlined">
+                    <Button onClick={() => {zoomFn(1)}} className={classes.topButtons} variant="outlined">
                         <ZoomIn/> Zoom In
                     </Button>
-                    <Button onClick={zoomOut} className={classes.topButtons} variant="outlined">
+                    <Button onClick={() => {zoomFn(-1)}} className={classes.topButtons} variant="outlined">
                         <ZoomOut/> Zoom Out
                     </Button>
                 </Container>
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img {...bindDrag()}
+                            <img {...bindGesture()}
+                                 ref={firstImage}
                                  draggable="false"
                                  className={classes.image}
                                  src={IMAGE_ROOT + images[current][left]}
@@ -168,7 +216,7 @@ export default function Comparison() {
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img {...bindDrag()}
+                            <img {...bindGesture()}
                                  draggable="false"
                                  className={classes.image}
                                  src={IMAGE_ROOT + images[current]['original']}
@@ -179,7 +227,7 @@ export default function Comparison() {
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img {...bindDrag()}
+                            <img {...bindGesture()}
                                  draggable="false"
                                  className={classes.image}
                                  src={IMAGE_ROOT + images[current][right]}
