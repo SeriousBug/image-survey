@@ -25,23 +25,15 @@ function Home() {
     return (
         <Container maxWidth={"sm"}>
             <Paper className={classes.paper}>
-                <h1 className={classes.title}>Image Survey</h1>
+                <h1 className={classes.title}>{process.env.REACT_APP_TITLE}</h1>
                 <p>
-                    This survey will ask you to compare images.
-                    It will take around 15 minutes to complete.
-                    We collect no private information.
+                    {process.env.REACT_APP_HOMEPAGE_PAR1}
                 </p>
                 <p>
-                    On each page, you will be shown an original image,
-                    and 2 variants of the original image.
-                    Please select the variant you think looks more similar to the
-                    original image. You can also pick 'same' if both variants
-                    look the same.
+                    {process.env.REACT_APP_HOMEPAGE_PAR2}
                 </p>
                 <p>
-                    The survey results will only be used for the Ohio State University
-                    CSE 5522 class. The results will be reported as aggregated statistics.
-                    No personally identifiable information is collected, stored, or reported.
+                    {process.env.REACT_APP_HOMEPAGE_PAR3}
                 </p>
                 <Link to="/start-survey/">
                     <Button className={classes.action} variant="contained" color="primary">

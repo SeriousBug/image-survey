@@ -3,7 +3,7 @@ import cookie from "js-cookie";
 import ErrorMsg from "./ErrorMsg";
 
 
-const COOKIE_NAME = 'image-survey'
+const COOKIE_NAME = 'auth'
 
 
 function __set_auth_token(token) {
@@ -60,7 +60,7 @@ async function init_token() {
 
 
 export async function init() {
-    axios.defaults.baseURL = 'http://localhost:8000';
+    axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
     await init_token();
 }
 
