@@ -202,6 +202,7 @@ export default function Comparison() {
                 </Container>
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs>
+                        <Typography style={{paddingLeft: '30%'}}>Left</Typography>
                         <Paper className={classes.paper}>
                             <img {...bindGesture()}
                                  ref={firstImage}
@@ -216,6 +217,7 @@ export default function Comparison() {
                         </Button>
                     </Grid>
                     <Grid item xs>
+                        <Typography style={{textAlign: 'center'}}>Original Baseline</Typography>
                         <Paper className={classes.paper}>
                             <img {...bindGesture()}
                                  draggable="false"
@@ -227,6 +229,7 @@ export default function Comparison() {
                                 variant="contained" color="primary">About same</Button>
                     </Grid>
                     <Grid item xs>
+                        <Typography style={{textAlign: 'right', paddingRight: '30%'}}>Right</Typography>
                         <Paper className={classes.paper}>
                             <img {...bindGesture()}
                                  draggable="false"
