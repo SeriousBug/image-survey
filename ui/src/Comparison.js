@@ -102,7 +102,8 @@ export default function Comparison() {
 
     const zoomFn = (dz) => {
         let newZoomLevel = zoomLevel + dz * ZOOM_SPEED;
-        if (MAX_ZOOM <= newZoomLevel || newZoomLevel <= 1) newZoomLevel = zoomLevel;
+        if (MAX_ZOOM <= newZoomLevel) newZoomLevel = MAX_ZOOM;
+        if (newZoomLevel <= 1) newZoomLevel = 1;
 
         setZoomLevel(newZoomLevel);
     };
@@ -192,10 +193,10 @@ export default function Comparison() {
                 </Container>
                 <Container>
                     <BackButton/>
-                    <Button onClick={() => {zoomFn(1)}} className={classes.topButtons} variant="outlined">
+                    <Button onClick={() => {zoomFn(-10)}} className={classes.topButtons} variant="outlined">
                         <ZoomIn/> Zoom In
                     </Button>
-                    <Button onClick={() => {zoomFn(-1)}} className={classes.topButtons} variant="outlined">
+                    <Button onClick={() => {zoomFn(+10)}} className={classes.topButtons} variant="outlined">
                         <ZoomOut/> Zoom Out
                     </Button>
                 </Container>
