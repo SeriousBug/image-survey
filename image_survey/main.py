@@ -96,7 +96,7 @@ async def rate(request):
         raise exceptions.InvalidUsage("Invalid request, missing some parameters")
     if voted not in image_collector.vote_sets:
         raise exceptions.InvalidUsage(f"{voted} is not a known image set")
-    if voted_for not in [voted.variant_A, voted.variant_B]:
+    if voted_for not in [voted.original, voted.variant_A, voted.variant_B]:
         raise exceptions.InvalidUsage(f"{voted_for} is not a correct option, must be {voted.variant_A} or {voted.variant_B}")
 
     logger.info(f"{request.token} rated {voted} with {voted_for}")
