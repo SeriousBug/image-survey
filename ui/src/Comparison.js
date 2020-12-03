@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import Paper from "@material-ui/core/Paper";
 import {Container} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -11,6 +11,8 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import {useHistory, useLocation, useParams} from "react-router-dom";
 import BackButton from "./BackButton"
 import {images, vote_image} from "./api";
+import {ZoomIn, ZoomOut} from "@material-ui/icons";
+import {bool, MersenneTwister19937} from "random-js";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(2),
         textAlign: 'left',
         color: theme.palette.text.primary,
+        overflow: 'hidden',
     },
     image: {
         maxWidth: '100%',
@@ -37,9 +40,10 @@ const useStyles = makeStyles((theme) => ({
         width: '40%',
         margin: '0 0 0 60%',
     },
-    backButton: {
+    topButtons: {
         marginBottom: theme.spacing(2),
-    }
+        marginLeft: theme.spacing(1),
+    },
 }));
 
 function LinearProgressWithLabel(props) {
@@ -65,14 +69,27 @@ LinearProgressWithLabel.propTypes = {
 };
 
 
-const IMAGE_ROOT = 'http://localhost:8000/'
-
+const IMAGE_ROOT = 'http://localhost:8000/';
+const MAX_ZOOM = 8;
 
 export default function Comparison() {
     const classes = useStyles();
     const {number} = useParams();
     const hist = useHistory();
     const loc = useLocation();
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [position, setPosition] = useState([0, 0]);
+
+    const zoomTransform = {
+        transform: 'scale(' + zoomLevel + ') translate(' + position[0] + 'px, ' + position[1] + 'px)'
+    }
+
+    const zoomIn = () => {
+        setZoomLevel((z) => {if (z < MAX_ZOOM) return z + 1; return z;});
+    }
+    const zoomOut = () => {
+        setZoomLevel((z) => {if (z > 1) return z - 1; return z;});
+    }
 
     useEffect(() => {
         console.log(loc.pathname);
@@ -90,7 +107,7 @@ export default function Comparison() {
         console.log('Rendering images[0] ' + JSON.stringify(images[current]));
 
         let left, right;
-        if (Math.round(Math.random()) === 1) {
+        if (bool()(MersenneTwister19937.seed(current))) {
             left = 'variant_A';
             right = 'variant_B';
         } else {
@@ -120,11 +137,21 @@ export default function Comparison() {
 
         return (
             <Container>
-                <BackButton/>
+                <Container>
+                    <BackButton/>
+                    <Button onClick={zoomIn} className={classes.topButtons} variant="outlined">
+                        <ZoomIn/> Zoom In
+                    </Button>
+                    <Button onClick={zoomOut} className={classes.topButtons} variant="outlined">
+                        <ZoomOut/> Zoom Out
+                    </Button>
+                </Container>
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image} src={IMAGE_ROOT + images[current][left]}/>
+                            <img className={classes.image}
+                                 src={IMAGE_ROOT + images[current][left]}
+                                 style={zoomTransform}/>
                         </Paper>
                         <Button onClick={choices(left)} className={classes.leftButton}
                                 variant="contained" color="primary">
@@ -133,14 +160,18 @@ export default function Comparison() {
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image} src={IMAGE_ROOT + images[current]['original']}/>
+                            <img className={classes.image}
+                                 src={IMAGE_ROOT + images[current]['original']}
+                                 style={zoomTransform}/>
                         </Paper>
                         <Button onClick={choices('original')} className={classes.centerButton}
                                 variant="contained" color="primary">About same</Button>
                     </Grid>
                     <Grid item xs>
                         <Paper className={classes.paper}>
-                            <img className={classes.image} src={IMAGE_ROOT + images[current][right]}/>
+                            <img className={classes.image}
+                                 src={IMAGE_ROOT + images[current][right]}
+                                 style={zoomTransform}/>
                         </Paper>
                         <Button onClick={choices(right)} className={classes.rightButton}
                                 variant="contained" color="primary">Right is better</Button>

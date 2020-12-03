@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
 
 function BackButton() {
     const classes = useStyles();
-    var hist = useHistory();
+    const hist = useHistory();
     return (
         <Button onClick={() => {
             hist.goBack();
