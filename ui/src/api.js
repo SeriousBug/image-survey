@@ -15,6 +15,31 @@ export let images = [];
 export let last_current = -1;
 
 
+function handle_network_errors(err) {
+    if (err.response) {
+        // Request was made, and response was received
+        console.log('Network error!');
+        console.log(err.response.data);
+        console.log(err.response.status);
+        console.log(err.response.headers);
+        if (err.response.status === 401) { // Auth error
+            cookie.remove(COOKIE_NAME);
+            console.log('Auth error, deleting existing auth cookie to resolve');
+        }
+    } else if (err.request) {
+        // Request was made, but no response received
+        console.log(err.request);
+    } else {
+        // Couldn't even make the request
+        console.log(err.message);
+    }
+    console.log(err.config);
+    ErrorMsg.showError(JSON.stringify(
+        [err, err.request, err.response]
+    ));
+}
+
+
 // Reload a saved token, or acquire a new one if needed
 async function init_token() {
     const token = cookie.get(COOKIE_NAME);
@@ -26,9 +51,7 @@ async function init_token() {
             cookie.set(COOKIE_NAME, token);
             __set_auth_token(token);
         } catch (err) {
-            console.log('Network error!')
-            console.log(err);
-            ErrorMsg.showError(JSON.stringify(err));
+            handle_network_errors(err);
         }
     } else {
         __set_auth_token(token);
@@ -49,9 +72,7 @@ export async function get_images() {
         images = response.data['votesets'];
         last_current = response.data['current'];
     } catch (err) {
-        console.log('Network error!')
-        console.log(err);
-        ErrorMsg.showError(JSON.stringify(err));
+        handle_network_errors(err);
     }
 }
 
@@ -60,8 +81,6 @@ export async function vote_image(data) {
     try {
         await axios.post('/api/rate', data);
     } catch (err) {
-        console.log('Network error!')
-        console.log(err);
-        ErrorMsg.showError(JSON.stringify(err));
+        handle_network_errors(err);
     }
 }

@@ -32,8 +32,6 @@ function StartSurvey(setImages, classes) {
         (async function () {
             await init();
             await get_images();
-            console.log('image_sets ' + JSON.stringify(images));
-            console.log('current ' + last_current);
             for (let i = 0; i <= last_current; i++) {
                 let target;
                 if (i >= images.length) {
