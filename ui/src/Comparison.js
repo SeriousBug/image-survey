@@ -126,7 +126,7 @@ export default function Comparison() {
             zoomFn(dy);
         },
         onPinch: ({delta: [distance, angle]}) => {
-            zoomFn(distance);
+            zoomFn(-1 * distance);
         },
     });
 
