@@ -225,8 +225,6 @@ export default function Comparison() {
                                  src={IMAGE_ROOT + images[current]['original']}
                                  style={zoomTransform}/>
                         </Paper>
-                        <Button onClick={choices('original')} className={classes.centerButton}
-                                variant="contained" color="primary">About same</Button>
                     </Grid>
                     <Grid item xs>
                         <Typography style={{textAlign: 'right', paddingRight: '30%'}}>Right</Typography>
