@@ -33,9 +33,7 @@ export default class ErrorMsg extends Component {
                 <DialogTitle>Error</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Something went wrong! Please create an issue on
-                        <a href="https://github.com/SeriousBug/image-survey/issues"> our Github page </a>
-                        and copy and paste the following information, then refresh the page.
+                      {process.env.REACT_APP_ERROR_MESSAGE}
                     </DialogContentText>
                     <DialogContentText>
                         <code>
