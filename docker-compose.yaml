@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  image-survey:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./image-files:/image-files
+      - ./etc:/etc/image-survey
+      - ./database:/database

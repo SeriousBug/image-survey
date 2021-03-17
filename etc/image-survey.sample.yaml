@@ -1,0 +1,33 @@
+# The port that the service will run under.
+PORT: 8000
+
+# The full path for the sqlite database file.
+DATABASE_LOCATION: '/database/image-survey.sqlite'
+
+# The location where the image files are located. See the readme under image-files for details.
+IMAGE_FILES_PATH: '/image-files'
+
+# Set this to a random value to prevent users from tampering with their authentication tokens.
+# If this is not changed, a user could potentially alter another users votes.
+# Changing this after people started taking the survey will make us to "forget" that they
+# were taking the survey and cause them to restart.
+AUTH_SECRET: 'image survey secret'
+
+# After this many seconds, we will forget a user that started taking our survey.
+# That means that the user can retake our survey, and will be treated like a new user.
+# Note that a user could retake the test earlier than this by deleting the information stored for this website.
+# Set to 4 weeks by default.
+AUTH_EXPIRATION_DELTA: 2419200
+
+
+# Maximum size for a user request, in bytes.
+# If your file names are REALLY long, you might have to increase this.
+REQUEST_MAX_SIZE: 8000
+WEBSOCKET_MAX_SIZE: 8000
+
+# How long to keep connections alive, in seconds.
+# Should be set to slightly longer than how long users will take examining each image comparison.
+KEEP_ALIVE_TIMEOUT: 30
+
+# Logs each request to the server. Set this to False if you'd like to avoid logging user IP addresses.
+ACCESS_LOGGING: True
