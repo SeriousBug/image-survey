@@ -83,7 +83,15 @@ limiter = Limiter(app, global_limits=['120/minute'], key_func=get_remote_address
 CORS(app)
 
 
-app.static('/image-files/', str(Path.cwd() / 'image-files'))
+index_page = str(Path.cwd() / 'ui' / 'build' / 'index.html')
+app.static('/', index_page)
+app.static('/start-survey/', index_page)
+app.static('/completed', index_page)
+@app.route('/survey/<n>')
+async def survey(request, n):
+    return await response.file(index_page)
+app.static('/static/', str(Path.cwd() / 'ui' / 'build' / 'static'))
+app.static('/image-files/', str(config['IMAGE_FILES_PATH']))
 
 
 @app.route("/api/rate", methods=["POST"])

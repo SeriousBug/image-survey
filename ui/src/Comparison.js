@@ -80,7 +80,7 @@ LinearProgressWithLabel.propTypes = {
 };
 
 
-const IMAGE_ROOT = process.env.REACT_APP_IMAGE_BASE_URL + '/';
+const IMAGE_ROOT = process.env.REACT_APP_IMAGE_BASE_URL;
 const MAX_ZOOM = parseInt(process.env.REACT_APP_IMAGE_MAX_ZOOM);
 /** negative numbers zoom in when the wheel is rolled forward, positive numbers are opposite */
 const ZOOM_SPEED = parseFloat(process.env.REACT_APP_IMAGE_ZOOM_SPEED);
