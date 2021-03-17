@@ -38,6 +38,7 @@ DEFAULT_CONFIG = {
     'AUTH_EXPIRATION_DELTA': 60 * 60 * 72,  # 72 hours
     'AUTH_URL_PREFIX': '/api/auth',
     'AUTH_SECRET': 'image-survey secret',
+    'PORT': 8000,
 }
 
 
@@ -150,4 +151,4 @@ if __name__ == "__main__":
     asyncio.run(database.setup_tables())
     with database:
         logger.info("Starting up server...")
-        app.run(host="0.0.0.0", port=8000, access_log=app.config['ACCESS_LOGGING'])
+        app.run(host="0.0.0.0", port=config['PORT'], access_log=app.config['ACCESS_LOGGING'])
