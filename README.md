@@ -52,7 +52,7 @@ docker-compose up -d
 Alternatively, you can build and run the container directly. To do so, run the following command to build the container.
 
 ``` shell
-docker build . --tag 'image-survey:1.0 --tag image-survey:latest'
+docker build . --tag 'image-survey:1.0' --tag 'image-survey:latest'
 ```
 
 You can then use the following command to run the service:
@@ -63,7 +63,7 @@ docker run -v etc/:/etc/image-survey/ -v image-files/:/image-files/ -v database/
 
 Either way, the service will now be available at `http://localhost:8000`. You
 can change which port the service is located at by modifying
-`docker-compose.yaml` if using docker-compose, or the `-p 8000:8000` line like `-p 1500:8000`.
+`docker-compose.yaml` if using docker-compose, or changing `-p 8000:8000`.
 
 
 ### Bare
