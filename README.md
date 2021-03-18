@@ -2,6 +2,8 @@
 
 Do qualitative image comparison surveys where 2 image variants are compared against an original.
 
+[A demo is available.](https://imagesurvey.kaangenc.me/)
+
 ![Example screenshot of the comparison UI.](misc/screenshot-vote.jpg)
 
 ## Requirements
