@@ -3,11 +3,11 @@ from collections import namedtuple
 from sanic.log import logger
 import itertools
 
-DEFAULT_LOCATION = Path.cwd() / 'image-files'
+DEFAULT_LOCATION = Path.cwd() / "image-files"
 
 
-Image = namedtuple('Image', ['path', 'name', 'variant'])
-VoteSet = namedtuple('VoteSet', ['original', 'variant_A', 'variant_B'])
+Image = namedtuple("Image", ["path", "name", "variant"])
+VoteSet = namedtuple("VoteSet", ["original", "variant_A", "variant_B"])
 
 
 class ImageSet:
@@ -27,26 +27,26 @@ class ImageSetCollector:
         try:
             return list(self.location.iterdir())
         except IOError:
-            logger.error(f'Failed to read subdirectories from {str(self.location)}')
+            logger.error(f"Failed to read subdirectories from {str(self.location)}")
             exit(1)
 
     @staticmethod
     def __check_image(image: Path):
         if not image.is_file():
-            logger.warning(f'Unexpected object {str(image)} in data set')
+            logger.warning(f"Unexpected object {str(image)} in data set")
             return False
-        if image.suffix.lower() not in {'.png', '.jpg', '.jpeg'}:
-            logger.warning(f'Skipping bad image type {image.suffix[1:]}, please convert it to PNG or JPG')
+        if image.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+            logger.warning(f"Skipping bad image type {image.suffix[1:]}, please convert it to PNG or JPG")
             return False
         return True
 
     @staticmethod
     def __check_image_set(image_set: ImageSet):
         if not image_set.original:
-            logger.warning(f'Image set {image_set.name} is missing the original image, skipping this set')
+            logger.warning(f"Image set {image_set.name} is missing the original image, skipping this set")
             return False
         if len(image_set.variants) < 2:
-            logger.warning(f'Image set {image_set.name} does not have 2 variants, skipping this set')
+            logger.warning(f"Image set {image_set.name} does not have 2 variants, skipping this set")
             return False
         return True
 
@@ -55,10 +55,9 @@ class ImageSetCollector:
         if not image_dir.is_dir():
             return
         try:
-            return list(filter(ImageSetCollector.__check_image,
-                               image_dir.iterdir()))
+            return list(filter(ImageSetCollector.__check_image, image_dir.iterdir()))
         except IOError:
-            logger.error(f'Failed to read image files from {str(image_dir)}')
+            logger.error(f"Failed to read image files from {str(image_dir)}")
             exit(1)
 
     def __compute_vote_pairs(self):
@@ -78,9 +77,9 @@ class ImageSetCollector:
                 continue
             for variant in variants:
                 variant_image = Image(variant, name, variant.stem)
-                if variant.stem == 'original':
+                if variant.stem == "original":
                     if image_set.original is not None:
-                        logger.warning(f'Multiple original images in {image_set.name}, please only keep one')
+                        logger.warning(f"Multiple original images in {image_set.name}, please only keep one")
                     image_set.original = variant_image
                 else:
                     image_set.variants[variant.stem] = variant_image

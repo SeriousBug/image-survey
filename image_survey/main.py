@@ -19,26 +19,26 @@ from sanic_cors import CORS
 
 CONFIG_LOCATIONS = [
     # Current directory
-    Path.cwd() / 'image-survey.yaml',
+    Path.cwd() / "image-survey.yaml",
     # $HOME/.config/image_survey or if defined, $XDG_CONFIG_DIRS/image_survey
-    Path(os.getenv('XDG_CONFIG_DIRS', default=(Path.home() / '.config'))) / 'image-survey' / 'image-survey.yaml',
+    Path(os.getenv("XDG_CONFIG_DIRS", default=(Path.home() / ".config"))) / "image-survey" / "image-survey.yaml",
     # /etc/image_survey
-    Path('/etc') / 'image-survey' / 'image-survey.yaml',
+    Path("/etc") / "image-survey" / "image-survey.yaml",
 ]
 
 
 # Default configuration, used as a fallback if no config file is found.
 DEFAULT_CONFIG = {
-    'DATABASE_LOCATION': './image-survey.sqlite',
-    'REQUEST_MAX_SIZE': 8000,
-    'WEBSOCKET_MAX_SIZE': 8000,
-    'KEEP_ALIVE_TIMEOUT': 15,
-    'ACCESS_LOGGING': True,
-    'IMAGE_FILES_PATH': './image-files',
-    'AUTH_EXPIRATION_DELTA': 60 * 60 * 72,  # 72 hours
-    'AUTH_URL_PREFIX': '/api/auth',
-    'AUTH_SECRET': 'image-survey secret',
-    'PORT': 8000,
+    "DATABASE_LOCATION": "./image-survey.sqlite",
+    "REQUEST_MAX_SIZE": 8000,
+    "WEBSOCKET_MAX_SIZE": 8000,
+    "KEEP_ALIVE_TIMEOUT": 15,
+    "ACCESS_LOGGING": True,
+    "IMAGE_FILES_PATH": "./image-files",
+    "AUTH_EXPIRATION_DELTA": 60 * 60 * 72,  # 72 hours
+    "AUTH_URL_PREFIX": "/api/auth",
+    "AUTH_SECRET": "image-survey secret",
+    "PORT": 8000,
 }
 
 
@@ -73,40 +73,47 @@ else:
 app.update_config(config)
 logger.info("Config loaded.")
 
-jwt = sanic_jwt.Initialize(app,
-                           authenticate=auth.authenticate(database),
-                           secret=config['AUTH_SECRET'],
-                           url_prefix=config['AUTH_URL_PREFIX'],
-                           expiration_delta=config['AUTH_EXPIRATION_DELTA'],
+jwt = sanic_jwt.Initialize(
+    app,
+    authenticate=auth.authenticate(database),
+    secret=config["AUTH_SECRET"],
+    url_prefix=config["AUTH_URL_PREFIX"],
+    expiration_delta=config["AUTH_EXPIRATION_DELTA"],
 )
-limiter = Limiter(app, global_limits=['120/minute'], key_func=get_remote_address)
+limiter = Limiter(app, global_limits=["120/minute"], key_func=get_remote_address)
 # TODO: Make this optionally enabled
 CORS(app)
 
 
-index_page = str(Path.cwd() / 'ui' / 'build' / 'index.html')
-app.static('/', index_page)
-app.static('/start-survey/', index_page)
-app.static('/completed', index_page)
-@app.route('/survey/<n>')
+index_page = str(Path.cwd() / "ui" / "build" / "index.html")
+app.static("/", index_page)
+app.static("/start-survey/", index_page)
+app.static("/completed", index_page)
+
+
+@app.route("/survey/<n>")
 async def survey(request, n):
     return await response.file(index_page)
-app.static('/static/', str(Path.cwd() / 'ui' / 'build' / 'static'))
-app.static('/image-files/', str(config['IMAGE_FILES_PATH']))
+
+
+app.static("/static/", str(Path.cwd() / "ui" / "build" / "static"))
+app.static("/image-files/", str(config["IMAGE_FILES_PATH"]))
 
 
 @app.route("/api/rate", methods=["POST"])
 @jwt.protected()
 async def rate(request):
     try:
-        voted = VoteSet(request.json['original'], request.json['variant_A'], request.json['variant_B'])
-        voted_for = request.json['voted_for']
+        voted = VoteSet(request.json["original"], request.json["variant_A"], request.json["variant_B"])
+        voted_for = request.json["voted_for"]
     except AttributeError:
         raise exceptions.InvalidUsage("Invalid request, missing some parameters")
     if voted not in image_collector.vote_sets:
         raise exceptions.InvalidUsage(f"{voted} is not a known image set")
     if voted_for not in [voted.original, voted.variant_A, voted.variant_B]:
-        raise exceptions.InvalidUsage(f"{voted_for} is not a correct option, must be {voted.variant_A} or {voted.variant_B}")
+        raise exceptions.InvalidUsage(
+            f"{voted_for} is not a correct option, must be {voted.variant_A} or {voted.variant_B}"
+        )
 
     logger.info(f"{request.token} rated {voted} with {voted_for}")
     await database.save_update_vote(request.token, voted, voted_for)
@@ -120,10 +127,12 @@ async def vote_sets(request: Request):
     uncast_votes = list(image_collector.vote_sets.difference(cast_votes))
     shuffle(uncast_votes)
     votes = [v._asdict() for v in itertools.chain(cast_votes, uncast_votes)]
-    return response.json({
-        'votesets': votes,
-        'current': len(cast_votes),
-    })
+    return response.json(
+        {
+            "votesets": votes,
+            "current": len(cast_votes),
+        }
+    )
 
 
 @app.route("/api/stats")
