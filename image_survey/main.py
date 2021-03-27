@@ -142,13 +142,16 @@ async def download_data(request):
     raise NotImplementedError()
 
 
-if __name__ == "__main__":
-    if config['IMAGE_FILES_PATH']:
-        image_collector.location = Path(config['IMAGE_FILES_PATH'])
+def main():
+    if config["IMAGE_FILES_PATH"]:
+        image_collector.location = Path(config["IMAGE_FILES_PATH"])
     image_collector.find_image_sets()
 
-    asyncio.run(database.connect(config['DATABASE_LOCATION']))
+    asyncio.run(database.connect(config["DATABASE_LOCATION"]))
     asyncio.run(database.setup_tables())
     with database:
         logger.info("Starting up server...")
-        app.run(host="0.0.0.0", port=config['PORT'], access_log=app.config['ACCESS_LOGGING'])
+        app.run(host="0.0.0.0", port=config["PORT"], access_log=app.config["ACCESS_LOGGING"])
+
+if __name__ == "__main__":
+    main()

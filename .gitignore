@@ -3,3 +3,4 @@ venv/
 image-survey.yaml
 *.sqlite
 *.sqlite-journal
+__pycache__

@@ -68,11 +68,10 @@ can change which port the service is located at by modifying
 
 ### Bare
 
-First, install the backend. At the top level directory:
+First, install [https://python-poetry.org/](poetry). Then run the following command and the top level directory
 
 ``` shell
-pip3 install -r requirements.txt
-pip3 install .
+poetry install
 ```
 
 Next, build the UI, inside the `ui` directory.
@@ -86,7 +85,7 @@ npm run build # or yarn build
 Finally, run the service. At the top level directory:
 
 ``` shell
-python3 image_survey/main.py
+poetry run python3 image_survey/main.py
 ```
 
 ## Development
@@ -94,12 +93,8 @@ python3 image_survey/main.py
 If you are working on modifying this codebase, you can follow these commands to set up your development environment.
 
 ```shell script
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-pip3 install -e .
-
-python3 image-survey/main.py
+poetry install
+poetry run image-survey
 
 # In a different terminal
 cd ui
