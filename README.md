@@ -85,7 +85,7 @@ npm run build # or yarn build
 Finally, run the service. At the top level directory:
 
 ``` shell
-poetry run python3 image_survey/main.py
+poetry run image-survey
 ```
 
 ## Development
