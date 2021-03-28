@@ -1,7 +1,8 @@
-from pathlib import Path
-from collections import namedtuple
-from sanic.log import logger
 import itertools
+from collections import namedtuple
+from pathlib import Path
+
+from sanic.log import logger
 
 DEFAULT_LOCATION = Path.cwd() / "image-files"
 

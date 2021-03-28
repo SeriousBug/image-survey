@@ -1,5 +1,6 @@
-from sanic_jwt import exceptions as jwt_exceptions
 from uuid import uuid4
+
+from sanic_jwt import exceptions as jwt_exceptions
 
 SURVEYEE = "surveyee"
 ADMIN = "admin"

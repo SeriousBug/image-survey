@@ -1,18 +1,19 @@
 import asyncio
-import os
 import itertools
-from random import shuffle
+import os
 from pathlib import Path
-from sanic import Sanic
+from random import shuffle
+
+import sanic_jwt
+import yaml
+from sanic import Sanic, exceptions, response
 from sanic.log import logger
 from sanic.request import Request
-from sanic import exceptions, response
-import sanic_jwt
-from sanic_limiter import Limiter, get_remote_address
-import yaml
-from image_survey import db, auth
-from image_survey.imagesets import ImageSetCollector, VoteSet
 from sanic_cors import CORS
+from sanic_limiter import Limiter, get_remote_address
+
+from image_survey import auth, db
+from image_survey.imagesets import ImageSetCollector, VoteSet
 
 # Potential locations of the config file.
 # We'll try them in order, falling back to latter ones if earlier ones do not exist.
@@ -161,6 +162,7 @@ def main():
     with database:
         logger.info("Starting up server...")
         app.run(host="0.0.0.0", port=config["PORT"], access_log=app.config["ACCESS_LOGGING"])
+
 
 if __name__ == "__main__":
     main()

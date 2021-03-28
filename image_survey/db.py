@@ -1,8 +1,10 @@
 import asyncio
 import os
-import aiosqlite
 from hashlib import scrypt
+
+import aiosqlite
 from sanic.log import logger
+
 from image_survey.imagesets import VoteSet
 
 
