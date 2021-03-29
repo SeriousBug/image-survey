@@ -22,7 +22,7 @@ CONFIG_LOCATIONS = [
     # Current directory
     Path.cwd() / "image-survey.yaml",
     # $HOME/.config/image_survey or if defined, $XDG_CONFIG_DIRS/image_survey
-    Path(os.getenv("XDG_CONFIG_DIRS", default=(Path.home() / ".config"))) / "image-survey" / "image-survey.yaml",
+    Path(os.getenv("XDG_CONFIG_DIRS", default=str(Path.home() / ".config"))) / "image-survey" / "image-survey.yaml",
     # /etc/image_survey
     Path("/etc") / "image-survey" / "image-survey.yaml",
 ]
@@ -86,15 +86,15 @@ limiter = Limiter(app, global_limits=["120/minute"], key_func=get_remote_address
 CORS(app)
 
 
-index_page = str(Path.cwd() / "ui" / "build" / "index.html")
-app.static("/", index_page)
-app.static("/start-survey/", index_page)
-app.static("/completed", index_page)
+INDEX_PAGE = str(Path.cwd() / "ui" / "build" / "index.html")
+app.static("/", INDEX_PAGE)
+app.static("/start-survey/", INDEX_PAGE)
+app.static("/completed", INDEX_PAGE)
 
 
 @app.route("/survey/<n>")
-async def survey(request, n):
-    return await response.file(index_page)
+async def survey(_request, _n):
+    return await response.file(INDEX_PAGE)
 
 
 app.static("/static/", str(Path.cwd() / "ui" / "build" / "static"))
@@ -162,7 +162,3 @@ def main():
     with database:
         logger.info("Starting up server...")
         app.run(host="0.0.0.0", port=config["PORT"], access_log=app.config["ACCESS_LOGGING"])
-
-
-if __name__ == "__main__":
-    main()

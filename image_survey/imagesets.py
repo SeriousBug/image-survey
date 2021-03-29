@@ -1,4 +1,5 @@
 import itertools
+import sys
 from collections import namedtuple
 from pathlib import Path
 
@@ -29,7 +30,7 @@ class ImageSetCollector:
             return list(self.location.iterdir())
         except IOError:
             logger.error(f"Failed to read subdirectories from {str(self.location)}")
-            exit(1)
+            sys.exit(1)
 
     @staticmethod
     def __check_image(image: Path):
@@ -54,18 +55,18 @@ class ImageSetCollector:
     @staticmethod
     def __find_variants(image_dir: Path):
         if not image_dir.is_dir():
-            return
+            return None
         try:
             return list(filter(ImageSetCollector.__check_image, image_dir.iterdir()))
         except IOError:
             logger.error(f"Failed to read image files from {str(image_dir)}")
-            exit(1)
+            sys.exit(1)
 
     def __compute_vote_pairs(self):
         self.vote_sets = set()
-        for name, image_set in self.image_sets.items():
-            for var_A, var_B in itertools.combinations(image_set.variants.values(), 2):
-                self.vote_sets.add(VoteSet(str(image_set.original.path), str(var_A.path), str(var_B.path)))
+        for _name, image_set in self.image_sets.items():
+            for var_a, var_b in itertools.combinations(image_set.variants.values(), 2):
+                self.vote_sets.add(VoteSet(str(image_set.original.path), str(var_a.path), str(var_b.path)))
 
     def find_image_sets(self):
         image_dirs = self.__find_image_dirs()

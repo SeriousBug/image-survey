@@ -7,7 +7,7 @@ ADMIN = "admin"
 
 
 def authenticate(database):
-    async def _authenticate(request, *args, **kwargs):
+    async def _authenticate(request, *_args, **_kwargs):
         if request.json:
             username = request.json.get("username", None)
             password = request.json.get("password", None)

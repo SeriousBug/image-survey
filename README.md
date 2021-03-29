@@ -104,3 +104,5 @@ yarn start
 
 Yarn starts a development server to serve the UI, make sure to use that so that
 you see any changes you make to the UI without having to do a full rebuild.
+
+Use the script `misc/lint.sh` to automatically format and lint your code.

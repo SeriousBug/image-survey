@@ -21,4 +21,5 @@ cd "${SCRIPTPATH}/.." || exit 12
 
 poetry run isort image_survey
 poetry run black image_survey
+poetry run unimport --diff --remove --exclude '__init__.py|tests' image_survey
 poetry run pylint -j 0 image_survey

@@ -71,8 +71,8 @@ class DB:
         async with self.__conn.execute(
             "SELECT original, option_A, option_B FROM votes WHERE token_id = ? ORDER BY date_cast ASC;", [token]
         ) as votes_cursor:
-            async for original, option_A, option_B in votes_cursor:
-                cast_votes.append(VoteSet(original, option_A, option_B))
+            async for original, option_a, option_b in votes_cursor:
+                cast_votes.append(VoteSet(original, option_a, option_b))
         return cast_votes
 
     def __enter__(self):
@@ -81,3 +81,6 @@ class DB:
     def __exit__(self, exc_type, exc_val, exc_tb):
         logger.info("Closing database connection!")
         asyncio.run(self.__conn.close())
+
+    async def close(self):
+        await self.__conn.close()
