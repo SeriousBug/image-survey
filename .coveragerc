@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = image_survey
+
+[report]
+fail_under = 60

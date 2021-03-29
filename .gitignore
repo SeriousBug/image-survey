@@ -4,3 +4,4 @@ image-survey.yaml
 *.sqlite
 *.sqlite-journal
 __pycache__
+.coverage

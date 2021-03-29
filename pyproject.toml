@@ -24,6 +24,7 @@ isort = "^5.8.0"
 unimport = "^0.8.3"
 ward = "^0.52.0-beta.0"
 httpx = "^0.17.1"
+coverage = "^5.5"
 
 [tool.poetry.scripts]
 image-survey = "image_survey.main:main"
