@@ -1,5 +1,7 @@
 # Image Survey
 
+[![Coverage Status](https://coveralls.io/repos/github/SeriousBug/image-survey/badge.svg)](https://coveralls.io/github/SeriousBug/image-survey) [![lint-and-test](https://github.com/SeriousBug/image-survey/actions/workflows/lint.yml/badge.svg)](https://github.com/SeriousBug/image-survey/actions/workflows/lint.yml)
+
 Do qualitative image comparison surveys where 2 image variants are compared against an original.
 
 [A demo is available.](https://imagesurvey.kaangenc.me/)
