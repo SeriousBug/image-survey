@@ -19,7 +19,13 @@ SCRIPT=$(realpath "${0}")
 SCRIPTPATH=$(dirname "${SCRIPT}")
 cd "${SCRIPTPATH}/.." || exit 12
 
-poetry run isort image_survey
-poetry run black image_survey
-poetry run unimport --diff --remove --exclude '__init__.py|tests' image_survey
-poetry run pylint -j 0 image_survey
+CHECK=
+if [[ $# -gt 1 && "$1" = "--check" ]] ; then
+  CHECK="--check"
+fi
+
+RUN="poetry run"
+${RUN} isort ${CHECK} image_survey
+${RUN} black ${CHECK} image_survey
+${RUN} unimport ${CHECK} --diff --remove --exclude '__init__.py|tests' image_survey
+${RUN} pylint -j 0 image_survey

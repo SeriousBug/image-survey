@@ -24,7 +24,7 @@ jobs:
 
       - name: Run linters
         run: |
-          bash misc/lint.sh
+          bash misc/lint.sh --check
 
       - name: Run tests
         run: |
