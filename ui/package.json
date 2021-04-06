@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.2.2",
     "axios": "^0.21.0",
+    "eslint-config-react-app": "^6.0.0",
     "fontsource-roboto": "^3.0.3",
     "js-cookie": "^2.2.1",
     "random-js": "^2.1.0",
@@ -45,5 +46,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.23.0"
   }
 }
