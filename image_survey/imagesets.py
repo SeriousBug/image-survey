@@ -48,9 +48,6 @@ class ImageSetCollector:
 
     @staticmethod
     def __check_image_set(image_set: ImageSet):
-        if not image_set.original:
-            logger.warning(f"Image set {image_set.name} is missing the original image, skipping this set")
-            return False
         if len(image_set.variants) < 2:
             logger.warning(f"Image set {image_set.name} does not have 2 variants, skipping this set")
             return False
@@ -70,7 +67,11 @@ class ImageSetCollector:
         self.vote_sets = set()
         for _name, image_set in self.image_sets.items():
             for var_a, var_b in itertools.combinations(image_set.variants.values(), 2):
-                self.vote_sets.add(VoteSet(str(image_set.original.path), str(var_a.path), str(var_b.path)))
+                self.vote_sets.add(
+                    VoteSet(
+                        str(image_set.original.path) if image_set.original else None, str(var_a.path), str(var_b.path)
+                    )
+                )
 
     def find_image_sets(self):
         image_dirs = self.__find_image_dirs()

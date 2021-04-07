@@ -45,6 +45,8 @@ DEFAULT_CONFIG = {
 
 image_collector = ImageSetCollector()
 database = db.DB()
+# Sanic used the wrong type for load_env, it's a bool or string. Override inspection for this statement.
+# noinspection PyTypeChecker
 app = Sanic("image survey", load_env="IMG_SURVEY_", strict_slashes=False)
 
 

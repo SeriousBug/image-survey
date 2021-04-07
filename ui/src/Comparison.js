@@ -79,6 +79,10 @@ LinearProgressWithLabel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
+const IMAGE_A11Y_WARNING =
+  "This survey is based entirely on images, and can not be administered with a text description." +
+  " Please contact the organization that prepared this survey for assistance.";
+
 const IMAGE_ROOT = process.env.REACT_APP_IMAGE_BASE_URL;
 const MAX_ZOOM = parseInt(process.env.REACT_APP_IMAGE_MAX_ZOOM);
 /** negative numbers zoom in when the wheel is rolled forward, positive numbers are opposite */
@@ -232,6 +236,7 @@ export default function Comparison() {
                 draggable="false"
                 className={classes.image}
                 src={IMAGE_ROOT + images[current][left]}
+                alt={IMAGE_A11Y_WARNING}
                 style={zoomTransform}
               />
             </Paper>
@@ -244,20 +249,23 @@ export default function Comparison() {
               Left is better
             </Button>
           </Grid>
-          <Grid item xs>
-            <Typography style={{ textAlign: "center" }}>
-              Original Baseline
-            </Typography>
-            <Paper className={classes.paper}>
-              <img
-                {...bindGesture()}
-                draggable="false"
-                className={classes.image}
-                src={IMAGE_ROOT + images[current]["original"]}
-                style={zoomTransform}
-              />
-            </Paper>
-          </Grid>
+          {images[current]["original"] != null ? (
+            <Grid item xs>
+              <Typography style={{ textAlign: "center" }}>
+                Original Baseline
+              </Typography>
+              <Paper className={classes.paper}>
+                <img
+                  {...bindGesture()}
+                  draggable="false"
+                  className={classes.image}
+                  src={IMAGE_ROOT + images[current]["original"]}
+                  alt={IMAGE_A11Y_WARNING}
+                  style={zoomTransform}
+                />
+              </Paper>
+            </Grid>
+          ) : null}
           <Grid item xs>
             <Typography style={{ textAlign: "right", paddingRight: "30%" }}>
               Right
@@ -268,6 +276,7 @@ export default function Comparison() {
                 draggable="false"
                 className={classes.image}
                 src={IMAGE_ROOT + images[current][right]}
+                alt={IMAGE_A11Y_WARNING}
                 style={zoomTransform}
               />
             </Paper>
