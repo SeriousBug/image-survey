@@ -6,6 +6,7 @@ from pathlib import Path
 from sanic.log import logger
 
 DEFAULT_LOCATION = Path.cwd() / "image-files"
+SUPPORTED_IMAGE_FORMATS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".apng"}
 
 
 Image = namedtuple("Image", ["path", "name", "variant"])
@@ -37,8 +38,11 @@ class ImageSetCollector:
         if not image.is_file():
             logger.warning(f"Unexpected object {str(image)} in data set")
             return False
-        if image.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
-            logger.warning(f"Skipping bad image type {image.suffix[1:]}, please convert it to PNG or JPG")
+        if image.suffix.lower() not in SUPPORTED_IMAGE_FORMATS:
+            logger.warning(
+                f"Skipping bad image type {image.suffix[1:]},"
+                f" please convert it to a supported format: {SUPPORTED_IMAGE_FORMATS}"
+            )
             return False
         return True
 
