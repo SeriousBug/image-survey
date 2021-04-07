@@ -29,3 +29,6 @@ ${RUN} isort ${CHECK} image_survey
 ${RUN} black ${CHECK} image_survey
 ${RUN} unimport ${CHECK} --diff --remove --exclude '__init__.py|tests' image_survey
 ${RUN} pylint -j 0 image_survey
+
+cd ui
+yarn eslint src/
