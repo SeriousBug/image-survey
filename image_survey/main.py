@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from random import shuffle
 
+import sanic.exceptions
 import sanic_jwt
 import yaml
 from sanic import Sanic, exceptions, response
@@ -14,6 +15,7 @@ from sanic_limiter import Limiter, get_remote_address
 
 from image_survey import auth, db
 from image_survey.imagesets import ImageSetCollector, VoteSet
+from image_survey.admin import check_disabled
 
 # Potential locations of the config file.
 # We'll try them in order, falling back to latter ones if earlier ones do not exist.
@@ -105,6 +107,7 @@ app.static("/image-files/", str(config["IMAGE_FILES_PATH"]))
 
 @app.route("/api/rate", methods=["POST"])
 @jwt.protected()
+@check_disabled(app)
 async def rate(request):
     try:
         voted = VoteSet(request.json["original"], request.json["variant_A"], request.json["variant_B"])
@@ -125,6 +128,7 @@ async def rate(request):
 
 @app.route("/api/vote_sets")
 @jwt.protected()
+@check_disabled(app)
 async def vote_sets(request: Request):
     cast_votes = await database.get_cast_votes(request.token)
     uncast_votes = list(image_collector.vote_sets.difference(cast_votes))
@@ -145,6 +149,18 @@ async def stats(request):
     # TODO
     raise NotImplementedError()
 
+@app.route("/api/admin/disable_surveys")
+@jwt.protected()
+@jwt.scoped([auth.ADMIN])
+async def stats(request):
+    try:
+        if request.json['disable']:
+            app.ctx.is_disabled = True
+        else:
+            app.ctx.is_disabled = False
+        return response.json(True)
+    except KeyError:
+        raise sanic.exceptions.InvalidUsage()
 
 @app.route("/api/download_data")
 @jwt.protected()
