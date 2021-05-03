@@ -14,11 +14,17 @@ class DB:
         self.__conn: aiosqlite.Connection = None
 
     async def setup_tables(self):
+        await self.__conn.execute("CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT);")
         await self.__conn.execute(
             "CREATE TABLE IF NOT EXISTS tokens(" "  id TEXT PRIMARY KEY," "  date_generated TEXT" ");"
         )
         await self.__conn.execute(
-            "CREATE TABLE IF NOT EXISTS admins(" "  username TEXT PRIMARY KEY," "  salt TEXT," "  password TEXT" ");"
+            "CREATE TABLE IF NOT EXISTS users("
+            "  username TEXT PRIMARY KEY,"
+            "  is_admin INTEGER,"
+            "  salt TEXT,"
+            "  password TEXT"
+            ");"
         )
         await self.__conn.execute(
             "CREATE TABLE IF NOT EXISTS votes("
@@ -40,16 +46,19 @@ class DB:
             [token],
         )
 
-    async def save_user(self, username, password):
+    async def save_user(self, username: str, password: str, is_admin: bool):
         salt = os.urandom(32)
         await self.__conn.execute(
-            "INSERT INTO admins VALUES(?, ?, ?);", [username, salt.hex(), scrypt(password, salt=salt)]
+            "INSERT INTO users VALUES(?, ?, ?, ?);", [username, int(is_admin), salt.hex(), scrypt(password, salt=salt)]
         )
 
     async def verify_user(self, username, password_claim):
-        salt_cursor = await self.__conn.execute("SELECT salt, password FROM admins WHERE username = ?;", [username])
-        salt, password_real = await salt_cursor.fetchone()
-        return scrypt(password_claim, salt=salt) == password_real
+        cursor = await self.__conn.execute("SELECT is_admin, salt, password FROM users WHERE username = ?;", [username])
+        results = await cursor.fetchone()
+        if results is None:
+            return False, False
+        is_admin, salt, password_real = results
+        return scrypt(password_claim, salt=salt) == password_real, is_admin
 
     async def save_update_vote(self, token, vote_set: VoteSet, voted_for):
         await self.__conn.execute(
@@ -74,6 +83,32 @@ class DB:
             async for original, option_a, option_b in votes_cursor:
                 cast_votes.append(VoteSet(original, option_a, option_b))
         return cast_votes
+
+    async def get_surveys_started(self):
+        cursor = await self.__conn.execute("SELECT COUNT(id) FROM tokens;")
+        return await cursor.fetchone()
+
+    async def get_surveys_completed(self, vote_sets):
+        cursor = await self.__conn.execute(
+            "SELECT COUNT(token_id) FROM ("
+            "    SELECT token_id, COUNT(token_id) as vote_count FROM votes GROUP BY token_id"
+            ") WHERE vote_count = ?;",
+            [len(vote_sets)],
+        )
+        return await cursor.fetchall()
+
+    async def get_all_votes(self):
+        raise NotImplementedError()
+
+    async def get_meta(self, key: str):
+        cursor = await self.__conn.execute("SELECT value FROM meta WHERE key = ?;", [key])
+        result = await cursor.fetchone()
+        return result[0] if result is not None else None
+
+    async def set_meta(self, key: str, value: str):
+        await self.__conn.execute(
+            "INSERT INTO meta VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = ?;", [key, value, value]
+        )
 
     def __enter__(self):
         return self

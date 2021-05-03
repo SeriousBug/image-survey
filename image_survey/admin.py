@@ -20,4 +20,5 @@ def check_disabled(app: Sanic):
             return await f(request, *args, **kwargs)
 
         return _check_disabled_decorated
+
     return _check_disabled_decorator

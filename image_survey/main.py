@@ -14,8 +14,8 @@ from sanic_cors import CORS
 from sanic_limiter import Limiter, get_remote_address
 
 from image_survey import auth, db
-from image_survey.imagesets import ImageSetCollector, VoteSet
 from image_survey.admin import check_disabled
+from image_survey.imagesets import ImageSetCollector, VoteSet
 
 # Potential locations of the config file.
 # We'll try them in order, falling back to latter ones if earlier ones do not exist.
@@ -93,10 +93,10 @@ CORS(app)
 INDEX_PAGE = str(Path.cwd() / "ui" / "build" / "index.html")
 app.static("/", INDEX_PAGE)
 app.static("/start-survey/", INDEX_PAGE)
-app.static("/completed", INDEX_PAGE)
+app.static("/complete/", INDEX_PAGE)
 
 
-@app.route("/survey/<n>")
+@app.route("/survey/<_n>")
 async def survey(_request, _n):
     return await response.file(INDEX_PAGE)
 
@@ -142,19 +142,24 @@ async def vote_sets(request: Request):
     )
 
 
-@app.route("/api/stats")
+@app.route("/api/user/stats")
 @jwt.protected()
-@jwt.scoped([auth.ADMIN])
+@jwt.scoped([auth.USER])
 async def stats(request):
-    # TODO
-    raise NotImplementedError()
+    return response.json(
+        {
+            "started": database.get_surveys_started(),
+            "completed": database.get_surveys_completed(image_collector.vote_sets),
+        }
+    )
+
 
 @app.route("/api/admin/disable_surveys")
 @jwt.protected()
 @jwt.scoped([auth.ADMIN])
 async def stats(request):
     try:
-        if request.json['disable']:
+        if request.json["disable"]:
             app.ctx.is_disabled = True
         else:
             app.ctx.is_disabled = False
@@ -162,7 +167,8 @@ async def stats(request):
     except KeyError:
         raise sanic.exceptions.InvalidUsage()
 
-@app.route("/api/download_data")
+
+@app.route("/api/user/download_data")
 @jwt.protected()
 @jwt.scoped([auth.ADMIN])
 async def download_data(request):

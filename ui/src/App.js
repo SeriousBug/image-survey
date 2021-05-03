@@ -10,6 +10,7 @@ import { get_images, images, init, last_current } from "./api";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
+import { Admin } from "./Admin";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -69,6 +70,9 @@ export default function App() {
         </Route>
         <Route path="/start-survey/">
           <StartSurvey />
+        </Route>
+        <Route path="/admin/">
+          <Admin />
         </Route>
         <Route path="*">
           <Container>

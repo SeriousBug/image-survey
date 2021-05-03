@@ -5,3 +5,5 @@ image-survey.yaml
 *.sqlite-journal
 __pycache__
 .coverage
+# Selecting poetry env creates this file, but the path is setup-dependent so it can't be shared
+.vscode/settings.json

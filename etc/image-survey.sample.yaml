@@ -19,6 +19,19 @@ AUTH_SECRET: 'image survey secret'
 # Set to 4 weeks by default.
 AUTH_EXPIRATION_DELTA: 2419200
 
+# Uncomment the following line if you are using a reverse proxy such as nginx.
+# nginx must set the same header configured here when proxying requests.
+# You can do so by adding the following line to your nginx configuration:
+#
+#     proxy_set_header X-Real-IP $remote_addr;
+#
+#REAL_IP_HEADER: "X-Real-IP"
+
+# The number of layers of proxies that the request goes through to get to this server.
+# Uncomment this line if you are using a reverse proxy such as nginx. Make sure to update the number
+# if you are chaining multiple reverse proxies.
+#PROXIES_COUNT: 1
+
 
 # Maximum size for a user request, in bytes.
 # If your file names are REALLY long, you might have to increase this.

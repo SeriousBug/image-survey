@@ -38,7 +38,6 @@ the folder on naming conventions.
 Then, go to the `ui` folder, copy the file `.env` to `.env.local`, then modify
 `.env.local` to customize the UI and fit your setup.
 
-
 ### Docker
 
 First, enter the `/etc` directory, copy `image-survey.sample.yaml` as
@@ -68,7 +67,6 @@ Either way, the service will now be available at `http://localhost:8000`. You
 can change which port the service is located at by modifying
 `docker-compose.yaml` if using docker-compose, or changing `-p 8000:8000`.
 
-
 ### Bare
 
 First, install [https://python-poetry.org/](poetry). Then run the following command and the top level directory
@@ -83,7 +81,6 @@ Next, build the UI, inside the `ui` directory.
 npm install # or yarn
 npm run build # or yarn build
 ```
-
 
 Finally, run the service. At the top level directory:
 
