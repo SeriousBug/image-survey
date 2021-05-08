@@ -27,3 +27,31 @@ async def _(db=database):
     votes = await db.get_cast_votes(token)
     assert(len(votes) == 1)
     assert(votes[0] == vset)
+
+
+@fixture
+async def database_with_users(db: DB=database):
+    await db.save_user('ham', 'spam', False)
+    await db.save_user('egg', 'bacon', True)
+
+
+@test('successful login')
+async def _(db: DB=database_with_users):
+    is_successful, is_admin = await db.verify_user('ham', 'spam')
+    assert(is_successful)
+    assert(not is_admin)
+    is_successful, is_admin = await db.verify_user('egg', 'bacon')
+    assert(is_successful)
+    assert(is_admin)
+
+
+@test('wrong password')
+async def _(db: DB=database_with_users):
+    is_successful, is_admin = await db.verify_user('ham', 'granola')
+    assert(not is_successful)
+
+
+@test('wrong username')
+async def _(db: DB=database_with_users):
+    is_successful, is_admin = await db.verify_user('waffle', 'spam')
+    assert(not is_successful)

@@ -96,11 +96,13 @@ class ImageSetCollector:
         self.__compute_vote_pairs()
 
     def print_report(self):
-        print(f'Found {len(self.image_sets)} sets, and {len(self.vote_sets)} votes are required to complete the survey.')
+        print(
+            f"Found {len(self.image_sets)} sets, and {len(self.vote_sets)} votes are required to complete the survey."
+        )
         for image_set in self.image_sets.values():
             if not image_set.original:
-                print(f'Image set {image_set.name} compares following images against each other')
+                print(f"Image set {image_set.name} compares following images against each other")
             else:
-                print(f'Image set {image_set.name} compares following images against {image_set.original}')
+                print(f"Image set {image_set.name} compares following images against {image_set.original}")
             for image in image_set.variants.values():
-                print(f'    Image {image.variant}')
+                print(f"    Image {image.variant}")

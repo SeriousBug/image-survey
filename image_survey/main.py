@@ -1,13 +1,12 @@
+import argparse
 import asyncio
-from getpass import getpass
 import itertools
 import os
+import sys
+from getpass import getpass
 from pathlib import Path
 from random import shuffle
-import argparse
-import sys
 
-import sanic.exceptions
 import sanic_jwt
 import yaml
 from sanic import Sanic, exceptions, response
@@ -148,7 +147,7 @@ async def vote_sets(request: Request):
 @app.route("/api/user/stats")
 @jwt.protected()
 @jwt.scoped([auth.USER])
-async def stats(request):
+async def stats(_request):
     return response.json(
         {
             "started": database.get_surveys_started(),
@@ -160,7 +159,7 @@ async def stats(request):
 @app.route("/api/admin/disable_surveys")
 @jwt.protected()
 @jwt.scoped([auth.ADMIN])
-async def stats(request):
+async def disable_surveys(request):
     try:
         if request.json["disable"]:
             app.ctx.is_disabled = True
@@ -168,7 +167,7 @@ async def stats(request):
             app.ctx.is_disabled = False
         return response.json(True)
     except KeyError:
-        raise sanic.exceptions.InvalidUsage()
+        raise exceptions.InvalidUsage("Request must identify whether surveys are enabled or disabled")
 
 
 @app.route("/api/user/download_data")
@@ -180,16 +179,39 @@ async def download_data(request):
 
 
 def add_user(username: str, is_admin: bool):
-    password = getpass(prompt=f'Password for {username}: ')
+    password = getpass(prompt=f"Password for {username}: ")
     asyncio.run(database.save_user(username, password, is_admin))
 
 
 def main():
     is_server = len(sys.argv) == 1
-    parser = argparse.ArgumentParser(description='Image survey server.')
-    parser.add_argument('-a', '--add-admin', dest='admin_username', default=list(), action='append', type=str, help='Set up an admin user. Admins have full control over the survey, including disabling the survey or deleting the results.')
-    parser.add_argument('-u', '--add-user', dest='username', default=list(), action='append', type=str, help='Set up a user. Users can view survey results, but can not control the survey.')
-    parser.add_argument('-c', '--check-images', dest='check_images', action='store_true', help='Check the configured image files, and report what configuration we found.')
+    parser = argparse.ArgumentParser(description="Image survey server.")
+    parser.add_argument(
+        "-a",
+        "--add-admin",
+        dest="admin_username",
+        default=list(),
+        action="append",
+        type=str,
+        help="Set up an admin user. Admins have full control over the survey, "
+        "including disabling the survey or deleting the results.",
+    )
+    parser.add_argument(
+        "-u",
+        "--add-user",
+        dest="username",
+        default=list(),
+        action="append",
+        type=str,
+        help="Set up a user. Users can view survey results, but can not control the survey.",
+    )
+    parser.add_argument(
+        "-c",
+        "--check-images",
+        dest="check_images",
+        action="store_true",
+        help="Check the configured image files, and report what configuration we found.",
+    )
     args = parser.parse_args()
 
     if config["IMAGE_FILES_PATH"]:
@@ -204,7 +226,7 @@ def main():
         add_user(username, False)
     for username in args.admin_username:
         add_user(username, True)
-    
+
     if not is_server:
         # Not running as a server, just exit.
         sys.exit(0)
@@ -215,5 +237,5 @@ def main():
         app.run(host="0.0.0.0", port=config["PORT"], access_log=app.config["ACCESS_LOGGING"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
