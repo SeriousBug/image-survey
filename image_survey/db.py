@@ -1,11 +1,26 @@
 import asyncio
+from base64 import b85decode, b85encode
 import os
-from hashlib import scrypt
+import hashlib
 
 import aiosqlite
 from sanic.log import logger
 
 from image_survey.imagesets import VoteSet
+
+
+# The following options configure scrypt to use 128 * N * R == 32 MB of memory
+# to hash a password. Changing these parameters will break verification for all
+# passwords, so avoid modifying these until we have support for re-hashing old
+# passwords.
+SCRYPT_N = 2**15  # Increase iterations and memory use
+SCRYPT_R = 8  # Increase memory use
+SCRYPT_P = 1  # Disallow parallelization
+SCRYPT_MAX_MEM = 2**26  # Don't use more than 64 MB of memory
+
+
+def scrypt(password: bytes, salt: bytes) -> bytes:
+    return hashlib.scrypt(password, salt=salt, n=SCRYPT_N, r=SCRYPT_R, p=SCRYPT_P, maxmem=SCRYPT_MAX_MEM)
 
 
 class DB:
@@ -16,14 +31,14 @@ class DB:
     async def setup_tables(self):
         await self.__conn.execute("CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT);")
         await self.__conn.execute(
-            "CREATE TABLE IF NOT EXISTS tokens(" "  id TEXT PRIMARY KEY," "  date_generated TEXT" ");"
+            "CREATE TABLE IF NOT EXISTS tokens(id TEXT PRIMARY KEY, date_generated TEXT);"
         )
         await self.__conn.execute(
             "CREATE TABLE IF NOT EXISTS users("
             "  username TEXT PRIMARY KEY,"
             "  is_admin INTEGER,"
-            "  salt TEXT,"
-            "  password TEXT"
+            "  salt BLOB,"
+            "  password BLOB"
             ");"
         )
         await self.__conn.execute(
@@ -49,7 +64,7 @@ class DB:
     async def save_user(self, username: str, password: str, is_admin: bool):
         salt = os.urandom(32)
         await self.__conn.execute(
-            "INSERT INTO users VALUES(?, ?, ?, ?);", [username, int(is_admin), salt.hex(), scrypt(password, salt=salt)]
+            "INSERT INTO users VALUES(?, ?, ?, ?);", [username, int(is_admin), salt, scrypt(password.encode(), salt=salt)]
         )
 
     async def verify_user(self, username, password_claim):
@@ -58,7 +73,7 @@ class DB:
         if results is None:
             return False, False
         is_admin, salt, password_real = results
-        return scrypt(password_claim, salt=salt) == password_real, is_admin
+        return scrypt(password_claim.encode(), salt=salt) == password_real, is_admin
 
     async def save_update_vote(self, token, vote_set: VoteSet, voted_for):
         await self.__conn.execute(

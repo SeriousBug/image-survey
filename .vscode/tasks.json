@@ -8,7 +8,10 @@
             "type": "shell",
             "command": "./misc/lint.sh",
             "problemMatcher": {
-                "fileLocation": ["relative", "${workspaceFolder}"],
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
                 "pattern": {
                     "regexp": "^(.*):(\\d+):(\\d+): (.*)$",
                     "file": 1,
@@ -21,7 +24,12 @@
         {
             "label": "test",
             "type": "shell",
-            "command": "poetry run coverage run -m ward ; poetry run coverage report"
+            "command": "poetry run coverage run -m ward ; poetry run coverage report",
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ]
 }
