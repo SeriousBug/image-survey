@@ -2,6 +2,7 @@ import itertools
 import sys
 from collections import namedtuple
 from pathlib import Path
+from typing import Dict, Optional, Set
 
 from sanic.log import logger
 
@@ -15,16 +16,16 @@ VoteSet = namedtuple("VoteSet", ["original", "variant_A", "variant_B"])
 
 class ImageSet:
     def __init__(self, name):
-        self.name = name
-        self.original = None
-        self.variants = {}
+        self.name: str = name
+        self.original: Optional[Image] = None
+        self.variants: Dict[str, Image] = {}
 
 
 class ImageSetCollector:
     def __init__(self, location=DEFAULT_LOCATION):
-        self.location = location
-        self.image_sets = {}
-        self.vote_sets = set()
+        self.location: Path = location
+        self.image_sets: Dict[str, ImageSet] = {}
+        self.vote_sets: Set[VoteSet] = set()
 
     def __find_image_dirs(self):
         try:
