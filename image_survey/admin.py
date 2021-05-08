@@ -15,8 +15,11 @@ def check_disabled(app: Sanic):
     def _check_disabled_decorator(func):
         @wraps(func)
         async def _check_disabled_decorated(request, *args, **kwargs):
-            if app.ctx.is_disabled:
-                raise DownForMaintenance()
+            try:
+                if app.ctx.is_disabled:  # TODO: Should make this persistent
+                    raise DownForMaintenance()
+            except AttributeError:
+                pass  # Not explicitly disabled or enabled, so assume that it's enabled
             return await func(request, *args, **kwargs)
 
         return _check_disabled_decorated

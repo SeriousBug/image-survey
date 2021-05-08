@@ -386,7 +386,7 @@ python-versions = "*"
 
 [[package]]
 name = "rfc3986"
-version = "1.4.0"
+version = "1.5.0"
 description = "Validating URI References per RFC 3986"
 category = "dev"
 optional = false
@@ -414,6 +414,17 @@ typing-extensions = ">=3.7.4,<4.0.0"
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
+
+[[package]]
+name = "rope"
+version = "0.19.0"
+description = "a python refactoring library..."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+dev = ["pytest"]
 
 [[package]]
 name = "sanic"
@@ -496,6 +507,19 @@ description = "Core routing component for Sanic"
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "sanic-testing"
+version = "0.3.1"
+description = "Core testing clients for Sanic"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+httpcore = ">=0.12.0,<0.13.0"
+httpx = ">=0.16,<0.18"
+websockets = "8.1"
 
 [[package]]
 name = "shellingham"
@@ -651,7 +675,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b46f69f39cc263cf714883879b9cf807f01aafb665db283c664c4a6c8fc1e187"
+content-hash = "19fb3088fdeac4f14f068e3936158c1b61f1a6664a6acbff4f7b9cf7632af207"
 
 [metadata.files]
 aiofiles = [
@@ -1022,12 +1046,15 @@ regex = [
     {file = "regex-2021.4.4.tar.gz", hash = "sha256:52ba3d3f9b942c49d7e4bc105bb28551c44065f139a65062ab7912bef10c9afb"},
 ]
 rfc3986 = [
-    {file = "rfc3986-1.4.0-py2.py3-none-any.whl", hash = "sha256:af9147e9aceda37c91a05f4deb128d4b4b49d6b199775fd2d2927768abdc8f50"},
-    {file = "rfc3986-1.4.0.tar.gz", hash = "sha256:112398da31a3344dc25dbf477d8df6cb34f9278a94fee2625d89e4514be8bb9d"},
+    {file = "rfc3986-1.5.0-py2.py3-none-any.whl", hash = "sha256:a86d6e1f5b1dc238b218b012df0aa79409667bb209e58da56d0b94704e712a97"},
+    {file = "rfc3986-1.5.0.tar.gz", hash = "sha256:270aaf10d87d0d4e095063c65bf3ddbc6ee3d0b226328ce21e036f946e421835"},
 ]
 rich = [
     {file = "rich-9.13.0-py3-none-any.whl", hash = "sha256:9004f6449c89abadf689dad6f92393e760b8c3a8a8c4ea6d8d474066307c0e66"},
     {file = "rich-9.13.0.tar.gz", hash = "sha256:d59e94a0e3e686f0d268fe5c7060baa1bd6744abca71b45351f5850a3aaa6764"},
+]
+rope = [
+    {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
 ]
 sanic = [
     {file = "sanic-21.3.2-py3-none-any.whl", hash = "sha256:9b63b0367f45a854023cb1f54a7315a86582442a08ba22f806c1f3ebf0c04e00"},
@@ -1050,6 +1077,10 @@ sanic-plugin-toolkit = [
 sanic-routing = [
     {file = "sanic-routing-0.5.2.tar.gz", hash = "sha256:96f3fe59d2b351aa3accb73362b839fba6263cf092c1a9c2e3774e66680562cd"},
     {file = "sanic_routing-0.5.2-py3-none-any.whl", hash = "sha256:c90c85948687e50ea72cb0cfa6e24fc0dd02b79b62b44cfa9e2b55a814781396"},
+]
+sanic-testing = [
+    {file = "sanic-testing-0.3.1.tar.gz", hash = "sha256:2d200b594c85426e0a61d057bf521e8df034c9bd2fba114edfba17485197c79b"},
+    {file = "sanic_testing-0.3.1-py3-none-any.whl", hash = "sha256:7b05e17d518802e84944a551ece08782390b02b0609b3ca892b7b226366a0d9d"},
 ]
 shellingham = [
     {file = "shellingham-1.4.0-py2.py3-none-any.whl", hash = "sha256:536b67a0697f2e4af32ab176c00a50ac2899c5a05e0d8e2dadac8e58888283f9"},

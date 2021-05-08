@@ -25,6 +25,8 @@ unimport = "^0.8.3"
 ward = "^0.52.0-beta.0"
 httpx = "^0.17.1"
 coverage = "^5.5"
+sanic-testing = "^0.3.1"
+rope = "^0.19.0"
 
 [tool.poetry.scripts]
 image-survey = "image_survey.main:main"

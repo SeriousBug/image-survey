@@ -46,9 +46,6 @@ DEFAULT_CONFIG = {
     "PORT": 8000,
 }
 
-
-image_collector = ImageSetCollector()
-database = db.DB()
 # Sanic used the wrong type for load_env, it's a bool or string. Override inspection for this statement.
 # noinspection PyTypeChecker
 app = Sanic("image survey", load_env="IMG_SURVEY_", strict_slashes=False)
@@ -82,7 +79,7 @@ logger.info("Config loaded.")
 
 jwt = sanic_jwt.Initialize(
     app,
-    authenticate=auth.authenticate(database),
+    authenticate=auth.authenticate(app),
     secret=config["AUTH_SECRET"],
     url_prefix=config["AUTH_URL_PREFIX"],
     expiration_delta=config["AUTH_EXPIRATION_DELTA"],
@@ -116,7 +113,7 @@ async def rate(request):
         voted_for = request.json["voted_for"]
     except AttributeError:
         raise exceptions.InvalidUsage("Invalid request, missing some parameters")
-    if voted not in image_collector.vote_sets:
+    if voted not in app.ctx.image_collector.vote_sets:
         raise exceptions.InvalidUsage(f"{voted} is not a known image set")
     if voted_for not in [voted.original, voted.variant_A, voted.variant_B]:
         raise exceptions.InvalidUsage(
@@ -124,7 +121,7 @@ async def rate(request):
         )
 
     logger.info(f"{request.token} rated {voted} with {voted_for}")
-    await database.save_update_vote(request.token, voted, voted_for)
+    await app.ctx.database.save_update_vote(request.token, voted, voted_for)
     return response.empty()
 
 
@@ -132,8 +129,8 @@ async def rate(request):
 @jwt.protected()
 @check_disabled(app)
 async def vote_sets(request: Request):
-    cast_votes = await database.get_cast_votes(request.token)
-    uncast_votes = list(image_collector.vote_sets.difference(cast_votes))
+    cast_votes = await app.ctx.database.get_cast_votes(request.token)
+    uncast_votes = list(app.ctx.image_collector.vote_sets.difference(cast_votes))
     shuffle(uncast_votes)
     votes = [v._asdict() for v in itertools.chain(cast_votes, uncast_votes)]
     return response.json(
@@ -150,8 +147,8 @@ async def vote_sets(request: Request):
 async def stats(_request):
     return response.json(
         {
-            "started": database.get_surveys_started(),
-            "completed": database.get_surveys_completed(image_collector.vote_sets),
+            "started": app.ctx.database.get_surveys_started(),
+            "completed": app.ctx.database.get_surveys_completed(app.ctx.image_collector.vote_sets),
         }
     )
 
@@ -180,7 +177,7 @@ async def download_data(request):
 
 def add_user(username: str, is_admin: bool):
     password = getpass(prompt=f"Password for {username}: ")
-    asyncio.run(database.save_user(username, password, is_admin))
+    asyncio.run(app.ctx.database.save_user(username, password, is_admin))
 
 
 def main():
@@ -214,14 +211,17 @@ def main():
     )
     args = parser.parse_args()
 
+    # Collect image sets, and report them if requested.
+    app.ctx.image_collector = ImageSetCollector()
     if config["IMAGE_FILES_PATH"]:
-        image_collector.location = Path(config["IMAGE_FILES_PATH"])
-    image_collector.find_image_sets()
+        app.ctx.image_collector.location = Path(config["IMAGE_FILES_PATH"])
+    app.ctx.image_collector.find_image_sets()
     if args.check_images:
-        image_collector.print_report()
+        app.ctx.image_collector.print_report()
 
     # Set up user and admin accounts.
-    asyncio.run(database.connect(config["DATABASE_LOCATION"]))
+    app.ctx.database = db.DB()
+    asyncio.run(app.ctx.database.connect(config["DATABASE_LOCATION"]))
     for username in args.username:
         add_user(username, False)
     for username in args.admin_username:
@@ -231,8 +231,8 @@ def main():
         # Not running as a server, just exit.
         sys.exit(0)
 
-    asyncio.run(database.setup_tables())
-    with database:
+    asyncio.run(app.ctx.database.setup_tables())
+    with app.ctx.database:
         logger.info("Starting up server...")
         app.run(host="0.0.0.0", port=config["PORT"], access_log=app.config["ACCESS_LOGGING"])
 
