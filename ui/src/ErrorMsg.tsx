@@ -4,18 +4,22 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 
-export default class ErrorMsg extends Component {
+type State = {
+  message: string | null;
+};
+
+export default class ErrorMsg extends Component<{}, State> {
   static _instance;
 
   constructor() {
-    super();
+    super({});
     this.state = {
       message: null,
     };
     ErrorMsg._instance = this;
   }
 
-  static showError(msg) {
+  static showError(msg: string) {
     ErrorMsg._instance.setState({ message: JSON.stringify(msg, null, 2) });
   }
 
