@@ -9,7 +9,7 @@ type State = {
 };
 
 export default class ErrorMsg extends Component<{}, State> {
-  static _instance;
+  static _instance: ErrorMsg;
 
   constructor() {
     super({});

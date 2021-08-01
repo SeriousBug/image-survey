@@ -30,6 +30,14 @@
                 "kind": "test",
                 "isDefault": true
             }
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "path": "ui/",
+            "problemMatcher": [],
+            "label": "npm: start - ui",
+            "detail": "react-scripts start"
         }
     ]
 }
