@@ -4,14 +4,19 @@ import ErrorMsg from "./ErrorMsg";
 
 const COOKIE_NAME = "auth";
 
-function __set_auth_token(token) {
+function __set_auth_token(token: string) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+}
+
+function set_auth_token(token: string) {
+  __set_auth_token(token);
+  cookie.set(COOKIE_NAME, token);
 }
 
 export let images = [];
 export let last_current = -1;
 
-function handle_network_errors(err) {
+function handle_network_errors(err: any) {
   if (err.response) {
     // Request was made, and response was received
     console.log("Network error!");
@@ -42,8 +47,7 @@ async function init_token() {
     try {
       const response = await axios.post("/api/auth", {});
       const token = response.data["access_token"];
-      cookie.set(COOKIE_NAME, token);
-      __set_auth_token(token);
+      set_auth_token(token);
     } catch (err) {
       handle_network_errors(err);
     }
@@ -53,6 +57,18 @@ async function init_token() {
 export async function init() {
   axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
   await init_token();
+}
+
+export async function login(username: string, password: string) {
+  try {
+    const response = await axios.post("/api/auth", { username, password });
+    const token = response.data["access_token"];
+    set_auth_token(token);
+    return true;
+  } catch {
+    // TODO: Better error handling so that failed network connections are handled differently than a bad password
+    return false;
+  }
 }
 
 export async function get_images() {
@@ -66,7 +82,7 @@ export async function get_images() {
   }
 }
 
-export async function vote_image(data) {
+export async function vote_image(data: any) {
   try {
     await axios.post("/api/rate", data);
   } catch (err) {
