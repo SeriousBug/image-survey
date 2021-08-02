@@ -6,8 +6,9 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import PropTypes from "prop-types";
-import LinearProgress from "@material-ui/core/LinearProgress";
+import LinearProgress, {
+  LinearProgressProps,
+} from "@material-ui/core/LinearProgress";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import BackButton from "./BackButton";
 import { images, vote_image } from "./api";
@@ -57,7 +58,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function LinearProgressWithLabel(props) {
+const LinearProgressWithLabel: React.FC<
+  LinearProgressProps & { value: number }
+> = (props) => {
   return (
     <Box margin="4em 10px" display="flex" alignItems="center">
       <Box width="100%" mr={1}>
@@ -70,13 +73,6 @@ function LinearProgressWithLabel(props) {
       </Box>
     </Box>
   );
-}
-LinearProgressWithLabel.propTypes = {
-  /**
-   * The value of the progress indicator for the determinate and buffer variants.
-   * Value between 0 and 100.
-   */
-  value: PropTypes.number.isRequired,
 };
 
 const IMAGE_A11Y_WARNING =
@@ -84,14 +80,16 @@ const IMAGE_A11Y_WARNING =
   " Please contact the organization that prepared this survey for assistance.";
 
 const IMAGE_ROOT = process.env.REACT_APP_IMAGE_BASE_URL;
-const MAX_ZOOM = parseInt(process.env.REACT_APP_IMAGE_MAX_ZOOM);
+const MAX_ZOOM = parseInt(process.env.REACT_APP_IMAGE_MAX_ZOOM!);
 /** negative numbers zoom in when the wheel is rolled forward, positive numbers are opposite */
-const ZOOM_SPEED = parseFloat(process.env.REACT_APP_IMAGE_ZOOM_SPEED);
+const ZOOM_SPEED = parseFloat(process.env.REACT_APP_IMAGE_ZOOM_SPEED!);
 const RND_SEED_COOKIE = "rndseed";
+
+type VoteVariant = "variant_A" | "variant_B" | "original";
 
 export default function Comparison() {
   const classes = useStyles();
-  const { number } = useParams();
+  const { number } = useParams<{ number: string }>();
   const hist = useHistory();
   const loc = useLocation();
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -108,9 +106,9 @@ export default function Comparison() {
       "px)",
   };
 
-  const firstImage = useRef(null);
+  const firstImage = useRef<HTMLImageElement>(null);
 
-  const zoomFn = (dz) => {
+  const zoomFn = (dz: number) => {
     let newZoomLevel = zoomLevel + dz * ZOOM_SPEED;
     if (MAX_ZOOM <= newZoomLevel) newZoomLevel = MAX_ZOOM;
     if (newZoomLevel <= 1) newZoomLevel = 1;
@@ -123,8 +121,8 @@ export default function Comparison() {
       let newX = position[0] + dx / zoomLevel;
       let newY = position[1] + dy / zoomLevel;
 
-      const imgHalfWidth = firstImage.current.width / 2;
-      const imgHalfHeight = firstImage.current.height / 2;
+      const imgHalfWidth = firstImage.current!.width / 2;
+      const imgHalfHeight = firstImage.current!.height / 2;
       if (
         (dx < 0 && newX < -1 * imgHalfWidth) ||
         (dx > 0 && newX > imgHalfWidth)
@@ -164,12 +162,14 @@ export default function Comparison() {
     // Randomly decide which variant should be displayed on the left, and which one on the right.
     // The outcome is consistent for the same user looking at the same image: it will be displayed
     // in the same places when going forward and backward in history, or when the page is refreshed.
-    let rndSeed = cookie.get(RND_SEED_COOKIE);
-    if (rndSeed === undefined) {
-      rndSeed = Math.round(Math.random());
-      cookie.set(RND_SEED_COOKIE, rndSeed);
+    let rndSeedCookie = cookie.get(RND_SEED_COOKIE);
+    if (!rndSeedCookie) {
+      rndSeedCookie = Math.round(Math.random()).toString();
+      cookie.set(RND_SEED_COOKIE, rndSeedCookie);
     }
-    let left, right;
+    const rndSeed = parseInt(rndSeedCookie);
+
+    let left: VoteVariant, right: VoteVariant;
     if (bool()(MersenneTwister19937.seed(current + rndSeed))) {
       left = "variant_A";
       right = "variant_B";
@@ -184,16 +184,15 @@ export default function Comparison() {
       variant_B: images[current]["variant_B"],
     };
 
-    function choices(choice) {
+    const choices = (choice: VoteVariant) => {
       return () => {
         let current = parseInt(number);
-        let vote = { ...data };
-        vote["voted_for"] = vote[choice];
+        let vote = { ...data, voted_for: data[choice] };
         vote_image(vote);
         if (current + 1 >= images.length) hist.push("/complete/");
         else hist.push("/survey/" + (current + 1));
       };
-    }
+    };
 
     return (
       <Container className={classes.comparisonContainer}>
@@ -290,7 +289,9 @@ export default function Comparison() {
             </Button>
           </Grid>
         </Grid>
-        <LinearProgressWithLabel value={number * (100 / images.length)} />
+        <LinearProgressWithLabel
+          value={parseInt(number) * (100 / images.length)}
+        />
       </Container>
     );
   } else {
