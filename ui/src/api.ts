@@ -89,3 +89,12 @@ export async function vote_image(data: any) {
     handle_network_errors(err);
   }
 }
+
+export async function get_stats() {
+  try {
+    const response = await axios.get("/api/user/stats");
+    return response.data;
+  } catch (err) {
+    handle_network_errors(err);
+  }
+}

@@ -7,8 +7,9 @@ import {
   Typography,
 } from "@material-ui/core";
 import { useState } from "react";
-import { login } from "./api";
+import { get_stats, login } from "./api";
 import React from "react";
+import { useEffect } from "react";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -64,9 +65,29 @@ const AdminLogin: React.FC<{ setLoggedIn: (state: boolean) => void }> = ({
   );
 };
 
+export function UserView() {
+  const [stats, setStats] = useState<
+    undefined | { started: string; completed: string }
+  >(undefined);
+  useEffect(() => {
+    (async () => {
+      setStats(await get_stats());
+    })();
+  });
+
+  if (stats === undefined) return <Typography>Loading...</Typography>;
+
+  return (
+    <Paper>
+      <Typography>Users started the survey: {stats.started}</Typography>
+      <Typography>Users started the survey: {stats.completed}</Typography>
+    </Paper>
+  );
+}
+
 export function Admin() {
   const [isLoggedIn, setLoggedIn] = useState(false);
 
-  if (isLoggedIn) return <AdminLogin setLoggedIn={setLoggedIn} />;
-  else return <Typography>Logged in!</Typography>;
+  if (!isLoggedIn) return <AdminLogin setLoggedIn={setLoggedIn} />;
+  else return <UserView />;
 }
