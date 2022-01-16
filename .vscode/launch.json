@@ -13,9 +13,11 @@
         },
         {
             "name": "Server",
-            "type": "python",
+            "type": "lldb",
             "request": "launch",
-            "module": "image_survey.main"
+            "program": "${workspaceRoot}/backend/target/debug/backend",
+            "args": [],
+            "cwd": "${workspaceRoot}/backend",
         }
     ],
     "compounds": [

@@ -19,12 +19,5 @@ SCRIPT=$(realpath "${0}")
 SCRIPTPATH=$(dirname "${SCRIPT}")
 cd "${SCRIPTPATH}/.." || exit 12
 
-CHECK=
-if [[ $# -gt 1 && "$1" = "--check" ]]; then
-  CHECK="--check"
-fi
-
-echo "${CHECK}"
-
-cd ui
-yarn eslint src/
+cargo install diesel_cli --no-default-features --features="sqlite,barrel-migrations,barrel/sqlite3"
+echo "Make sure to add ${HOME} to your PATH so you can access diesel"
