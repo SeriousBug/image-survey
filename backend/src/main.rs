@@ -1,15 +1,18 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-
 mod fairings;
 use fairings::logger::Logger;
 use fairings::database::Db;
+mod entity;
+use entity::users;
+
 use tracing::Level;
+use tracing_unwrap::ResultExt;
+
 use sea_orm_rocket::{Database, Connection};
+use sea_orm::{entity::*, query::*};
 
 #[macro_use] extern crate rocket;
-#[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate serde_derive;
-use rocket_contrib::json::{Json, JsonValue};
+use rocket::serde::json::{Json, Value, serde_json::json};
+use rocket::serde::{Serialize, Deserialize};
 
 #[get("/")]
 fn index() -> &'static str {
@@ -17,6 +20,7 @@ fn index() -> &'static str {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 enum TokenType {
     ANON,
     VIEW,
@@ -24,26 +28,55 @@ enum TokenType {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct Token {
     token: String,
     tokenType: TokenType,
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct Login {
     username: String,
     password: String,
 }
 
-type LoginAttempt = Option<Login>;
-
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct Error {
+    context: String,
+    message: String,
+}
 
 #[post("/auth", format = "json", data = "<login>")]
-fn auth(conn: Connection<'_, Db>, login: Json<Login>) -> JsonValue {
-    json!(Token {
-        token: login.username,
-        tokenType: TokenType::VIEW
-    })
+async fn auth(conn: Connection<'_, Db>, login: Option<Json<Login>>) -> Value {
+    match login {
+        Some(data) => {
+            let db = conn.into_inner();
+            
+            // TODO: Should respond with an error if fails
+            let found = users::Entity::find_by_id(data.username.clone()).one(db).await.unwrap_or_log();
+            match found {
+                Some(foundData) => {
+                    json!(Token {
+                        token: foundData.username,
+                        tokenType: TokenType::VIEW
+                    })
+                },
+                None => {
+                    json!(Error {
+                        context: String::from("auth"),
+                        message: String::from("User or password incorrect")
+                    })
+                }
+            }
+            
+        },
+        None => json!(Token {
+            token: String::from("anon"),
+            tokenType: TokenType::ANON
+        }),
+    }
 }
 
 #[launch]

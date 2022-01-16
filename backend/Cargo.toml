@@ -7,8 +7,7 @@ edition = "2021"
 
 [dependencies]
 # Web server
-rocket = {version = "^0.5.0-rc.1", features = ["json"]}
-rocket_contrib = {version = "^0.4.10", default-features = false, features = ["json"]}
+rocket = {version = "^0.5.0-rc.1", features = ["json", "uuid"]}
 # Logging
 tracing = "^0.1"
 tracing-subscriber = "^0.3.6"
@@ -18,7 +17,3 @@ sea-orm = { version = "^0.5.0", features = [ "sqlx-sqlite", "runtime-tokio-rustl
 sea-orm-rocket = "^0.5.0"
 # load .env files and env vars
 dotenv = "^0.15.0"
-# Serialization
-serde = "^1.0"
-serde_json = "^1.0"
-serde_derive = "^1.0"

@@ -6,7 +6,7 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "Users")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
-    pub username: Option<String>,
+    pub username: String,
     pub r#type: String,
     #[sea_orm(column_type = "Custom(\"BLOB\".to_owned())")]
     pub salt: String,
