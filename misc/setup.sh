@@ -19,5 +19,6 @@ SCRIPT=$(realpath "${0}")
 SCRIPTPATH=$(dirname "${SCRIPT}")
 cd "${SCRIPTPATH}/.." || exit 12
 
-cargo install diesel_cli --no-default-features --features="sqlite,barrel-migrations,barrel/sqlite3"
-echo "Make sure to add ${HOME} to your PATH so you can access diesel"
+cargo install sqlx-cli
+cargo install sea-orm-cli
+echo "Make sure to add ${HOME} to your PATH so you can access sqlx and sea-orm-cli"
