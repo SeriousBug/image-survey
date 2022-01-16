@@ -5,25 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "command": "npm start",
-            "name": "UI",
-            "request": "launch",
-            "cwd": "${workspaceFolder}/ui",
-            "type": "node-terminal"
-        },
-        {
-            "name": "Server",
+            "name": "Backend",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceRoot}/backend/target/debug/backend",
             "args": [],
             "cwd": "${workspaceRoot}/backend",
+            "preLaunchTask": "Build backend"
         }
+        {
+            "command": "npm start",
+            "name": "Frontend",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/ui",
+            "type": "node-terminal"
+        },
     ],
     "compounds": [
         {
           "name": "Server and UI",
-          "configurations": ["Server", "UI"]
+          "configurations": ["Backend", "Frontend"]
         }
     ]
 }
