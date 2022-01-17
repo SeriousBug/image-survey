@@ -12,7 +12,7 @@
             "args": [],
             "cwd": "${workspaceRoot}/backend",
             "preLaunchTask": "Build backend"
-        }
+        },
         {
             "command": "npm start",
             "name": "Frontend",
